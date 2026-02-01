@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: manifests/40-iam-karpenter
+    path: manifests/40-crossplane-providers
   destination:
     server: https://kubernetes.default.svc
     namespace: crossplane-system
