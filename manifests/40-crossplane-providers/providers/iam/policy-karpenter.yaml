@@ -4,8 +4,6 @@ metadata:
   name: pol-karpenter-open
 spec:
   forProvider:
-    compartmentIdSelector:
-            matchControllerRef: true
     name: pol-karpenter-open
     description: "Workload Identity policy for Karpenter (demo, open but constrained)"
     statements:
