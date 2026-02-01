@@ -9,7 +9,7 @@ spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
-    path: apps/05-karpenter/chart
+    path: charts/05-karpenter/chart
     targetRevision: main
     helm:
       valueFiles:
