@@ -1,0 +1,22 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: oci-lb-proxy
+  namespace: envoy-gateway-system
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        type: LoadBalancer
+        allocateLoadBalancerNodePorts: false
+        externalTrafficPolicy: Cluster
+        annotations:
+          oci.oraclecloud.com/load-balancer-type: "lb"
+          service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+          service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+          service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "100"
+          oci-load-balancer.oraclecloud.com/health-check: '{"protocol":"HTTP","port":10080,"urlPath":"/","retries":3,"timeoutInMillis":4000}'
+          oci.oraclecloud.com/security-rule-management-mode: "NSG"
+          oci.oraclecloud.com/oci-backend-network-security-group: "ocid1.networksecuritygroup.oc1.eu-frankfurt-1.aaaaaaaaaop7xrbqqzr36fr77flojwiu7locutszbueioyqits5zay4k2fxa" # Replace with the OCID of the NSG associated with the Pods subnet
+          service.beta.kubernetes.io/oci-load-balancer-backend-protocol: "HTTP"

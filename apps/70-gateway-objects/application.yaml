@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: apps/70-gateway-objects/manifests
+    path: manifests/70-gateway-objects
   destination:
     server: https://kubernetes.default.svc
     namespace: gateway-system
