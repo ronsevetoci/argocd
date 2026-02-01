@@ -168,7 +168,7 @@ settings:
   instanceTypeMetaConfigMapName: oci-instance-type-meta
   clusterCompartmentId: "ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa"
   vcnCompartmentId: "ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa"
-  ociVcnIpNative: false
+  ociVcnIpNative: true
   ipFamilies: [ IPv4 ]
   apiserverEndpoint: ""
   batchMaxDuration: 10s
