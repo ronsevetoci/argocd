@@ -8,9 +8,9 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://phx.ocir.io/id9y6mi8tcky
-    chart: karpenter-provider-oci
-    targetRevision: "0.1.107"
+    repoURL: https://github.com/ronsevetoci/argocd.git
+    path: apps/05-karpenter/chart
+    targetRevision: main
     helm:
       valueFiles:
         - values.yaml

@@ -1,0 +1,148 @@
+# ---
+# apiVersion: karpenter.sh/v1
+# kind: NodePool
+# metadata:
+#   name: karpenter1
+# spec:
+#   template:
+#     spec:
+#       expireAfter: Never
+#       nodeClassRef:
+#         group: oci.oraclecloud.com
+#         kind: OCINodeClass
+#         name: karpenter1
+#       requirements:
+#         - key: karpenter.sh/capacity-type
+#           operator: In
+#           values:
+#             - on-demand
+#         - key: oci.oraclecloud.com/instance-shape #expand this list in need
+#           operator: In
+#           values:
+#             - VM.Standard.E3.Flex
+#             - VM.Standard.E4.Flex
+#             - VM.Standard.E5.Flex
+#       terminationGracePeriod: 120m
+#   disruption:
+#     budgets:
+#       - nodes: 5%
+#     consolidateAfter: 60m
+#     consolidationPolicy: WhenEmpty
+#   limits:
+#     cpu: 20
+#     memory: 160Gi 
+# ---
+# apiVersion: oci.oraclecloud.com/v1alpha1
+# kind: OCINodeClass
+# metadata:
+#   name: karpenter1
+# spec:
+#   shapeConfigs:
+#     - ocpus: 2  
+#       memoryInGbs: 8
+#     - ocpus: 4
+#       memoryInGbs: 16
+#   volumeConfig:
+#     bootVolumeConfig:
+#       imageConfig:
+#         imageType: OKEImage
+#         imageId: ocid1.image.oc1.eu-frankfurt-1.aaaaaaaark6eswpvweu4epvsu4hftwbtzcpxaeat6i4ap2r7jv6zborelpaq #refer to ImageConfig section above to find an compatible OKEImage 
+#   networkConfig:
+#     primaryVnicConfig:
+#       subnetConfig:
+#         subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadijhvvr4l7efwbab5s7uleo6veqhkuwhyjaoi6zp2655fdiskqtq
+---
+apiVersion: oci.oraclecloud.com/v1alpha1
+kind: OCINodeClass
+metadata:
+  name: karpenter1
+spec:
+  shapeConfigs:
+    - ocpus: 2  
+      memoryInGbs: 8
+    - ocpus: 4
+      memoryInGbs: 16
+  volumeConfig:
+    bootVolumeConfig:
+      imageConfig:
+         imageType: OKEImage
+         imageId: ocid1.image.oc1.eu-frankfurt-1.aaaaaaaark6eswpvweu4epvsu4hftwbtzcpxaeat6i4ap2r7jv6zborelpaq #refer to ImageConfig section above to find an compatible OKEImage 
+  networkConfig:
+    primaryVnicConfig:
+      networkSecurityGroupConfigs:
+        - networkSecurityGroupId: ocid1.networksecuritygroup.oc1.eu-frankfurt-1.aaaaaaaaw35krjczv5ergu4gg4odhkwk2slnd37wa24tyf2vzhjnkivt7niq
+      subnetConfig:
+        subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadijhvvr4l7efwbab5s7uleo6veqhkuwhyjaoi6zp2655fdiskqtq
+    secondaryVnicConfigs:
+      - networkSecurityGroupConfigs:
+          - networkSecurityGroupId: ocid1.networksecuritygroup.oc1.eu-frankfurt-1.aaaaaaaagwg664yixfjgvzmvimwxxor7sjlklxg2qnyjmvgyulf66xv4fcba
+        subnetConfig:
+          subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaafmf6w7fvpcjawjt6e4mqjz5hy732ulw7u7fmgk2ucnh5ctfbhjta
+        ipCount: 16 
+
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: karpenter-preemptible
+spec:
+  template:
+    spec:
+      expireAfter: Never
+      nodeClassRef:
+        group: oci.oraclecloud.com
+        kind: OCINodeClass
+        name: karpenter1
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values:
+            - spot
+        - key: oci.oraclecloud.com/instance-shape #expand this list in need
+          operator: In
+          values:
+            - VM.Standard.E3.Flex
+            - VM.Standard.E4.Flex
+            - VM.Standard.E5.Flex
+      terminationGracePeriod: 120m
+  disruption:
+    budgets:
+      - nodes: 5%
+    consolidateAfter: 60m
+    consolidationPolicy: WhenEmpty
+  limits:
+    cpu: 20
+    memory: 160Gi 
+
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: karpenter-1
+spec:
+  template:
+    spec:
+      expireAfter: Never
+      nodeClassRef:
+        group: oci.oraclecloud.com
+        kind: OCINodeClass
+        name: karpenter1
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values:
+            - on-demand
+        - key: oci.oraclecloud.com/instance-shape #expand this list in need
+          operator: In
+          values:
+            - VM.Standard.E4.Flex
+            - VM.Standard.E5.Flex
+      terminationGracePeriod: 120m
+  disruption:
+    budgets:
+      - nodes: 5%
+    consolidateAfter: 60m
+    consolidationPolicy: WhenEmpty
+  limits:
+    cpu: 20
+    memory: 160Gi 
