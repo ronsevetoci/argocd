@@ -1,4 +1,4 @@
-apiVersion: identity.oci.oraclecloud.com/v1alpha1   # <-- adjust to your installed CRD group/version
+apiVersion: identity.oci.upbound.io/v1alpha1
 kind: Policy                                        # <-- adjust if provider uses a different Kind name
 metadata:
   name: pol-karpenter-open
