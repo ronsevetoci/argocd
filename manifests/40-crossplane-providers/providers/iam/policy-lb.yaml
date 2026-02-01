@@ -8,7 +8,6 @@ spec:
     name: pol-gateway-open
     description: "Gateway/Ingress controller policy (demo, minimal)"
     statements:
-      # Required per OCI doc for ingress controller provisioning LBs :contentReference[oaicite:6]{index=6}
       - "Allow any-user to manage load-balancers in compartment ron.sevet where all where { request.principal.type = 'cluster'}"
       - "Allow any-user to use virtual-network-family in compartment ron.sevet where { request.principal.type = 'cluster'}"
       - "Allow any-user to manage network-security-groups in compartment ron.sevet where { request.principal.type = 'cluster'}"
