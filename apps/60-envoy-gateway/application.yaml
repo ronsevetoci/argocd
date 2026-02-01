@@ -4,20 +4,25 @@ metadata:
   name: 60-envoy-gateway
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "60"
+    argocd.argoproj.io/sync-wave: '60'
 spec:
   project: platform
   source:
-    repoURL: https://github.com/ronsevetoci/argocd.git
-    targetRevision: main
-    path: apps/60-envoy-gateway
+    repoURL: oci://docker.io/envoyproxy
+    chart: gateway-helm
+    targetRevision: v1.6.3
     helm:
-      valueFiles:
-        - values.yaml
+      releaseName: eg
+      skipCrds: true
+      values: "deployment:\n  envoyGateway:\n    nodeSelector:\n      name: core\n\
+        \n# Optional: run multiple replicas (needs PDB/HA considerations)\n# deployment:\n\
+        #   replicas: 2\n"
   destination:
     server: https://kubernetes.default.svc
-    namespace: gateway-system
+    namespace: envoy-gateway-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

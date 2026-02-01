@@ -4,16 +4,21 @@ metadata:
   name: 10-crossplane
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: '10'
 spec:
   project: platform
   source:
-    repoURL: https://github.com/ronsevetoci/argocd.git
-    targetRevision: main
-    path: apps/10-crossplane
+    repoURL: https://charts.crossplane.io/stable
+    chart: crossplane
+    targetRevision: '>=1.0.0'
     helm:
-      valueFiles:
-        - values.yaml
+      releaseName: crossplane
+      values: "# Keep Crossplane on the 'core' nodepool\nnodeSelector:\n  name: core\n\
+        \n# If your core nodepool is tainted, uncomment and match it:\n# tolerations:\n\
+        #   - key: \"core\"\n#     operator: \"Equal\"\n#     value: \"true\"\n# \
+        \    effect: \"NoSchedule\"\n\n# Optional: make package pulls deterministic\
+        \ (Crossplane >= v1.14 changed defaults to xpkg.upbound.io)\n# args:\n#  \
+        \ - --registry=xpkg.upbound.io\n"
   destination:
     server: https://kubernetes.default.svc
     namespace: crossplane-system
@@ -21,3 +26,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

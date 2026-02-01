@@ -8,7 +8,7 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://github.com/ronsevetoci/argocd.git
+    repoURL: REPO_URL
     targetRevision: main
     path: apps/20-oci-provider/manifests
   destination:

@@ -1,1 +1,178 @@
-# TODO: karpenter values
+# Default values for karpenter-provider-oci.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Overrides the chart's name.
+nameOverride: ""
+# -- Overrides the chart's computed fullname.
+fullnameOverride: ""
+
+# -- Additional labels to add into metadata.
+additionalLabels: {}
+# -- Additional annotations to add into metadata.
+additionalAnnotations: {}
+
+# -- Specifies additional rules for the core ClusterRole.
+additionalClusterRoleRules: []
+
+# -- Image pull policy for Docker images.
+imagePullPolicy: IfNotPresent
+# -- Image pull secrets for Docker images.
+imagePullSecrets: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+serviceMonitor:
+  # -- Specifies whether a ServiceMonitor should be created.
+  enabled: false
+  # -- Additional labels for the ServiceMonitor.
+  additionalLabels: {}
+  # -- Configuration on `http-metrics` endpoint for the ServiceMonitor.
+  # Not to be used to add additional endpoints.
+  # See the Prometheus operator documentation for configurable fields https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+  endpointConfig: {}
+
+# -- The number of old ReplicaSets to retain to allow rollback.
+revisionHistoryLimit: 10
+# -- Strategy for updating the pod.
+strategy:
+  rollingUpdate:
+    maxUnavailable: 1
+# -- Additional labels for the pod.
+podLabels: {}
+# -- Additional annotations for the pod.
+podAnnotations: {}
+podDisruptionBudget:
+  name: karpenter
+  maxUnavailable: 1
+
+# -- Log level - defaults is INFO
+logLevel: info
+
+# -- Log outputPaths - defaults to stdout only
+logOutputPaths:
+  - stdout
+# -- Log errorOutputPaths - defaults to stderr only
+logErrorOutputPaths:
+  - stderr
+
+# -- PriorityClass name for the pod.
+priorityClassName: system-cluster-critical
+# -- Override the default termination grace period for the pod.
+terminationGracePeriodSeconds:
+# -- Bind the pod to the host network.
+# This is required when using a custom CNI.
+hostNetwork: false
+# -- Configure the DNS Policy for the pod
+dnsPolicy: Default
+# -- Configure DNS Config for the pod
+dnsConfig: {}
+#  options:
+#    - name: ndots
+#      value: "1"
+# -- Node selectors to schedule the pod to nodes with labels.
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+volumes: []
+volumeMounts: []
+
+replicaCount: 2
+
+image:
+  registry: phx.ocir.io
+  repositoryName: id9y6mi8tcky/oke-public-karpenter-provider-oci
+  pullPolicy: IfNotPresent
+#  tag: 0.1.107
+
+# -- Node selectors to schedule the pod to nodes with labels.
+nodeSelector:
+  name: core
+  kubernetes.io/os: linux
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: karpenter.sh/nodepool
+              operator: DoesNotExist
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: "kubernetes.io/hostname"
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+
+tolerations:
+  # If your core nodepool is tainted (recommended), uncomment and match this:
+  # - key: core
+  #   operator: Equal
+  #   value: "true"
+  #   effect: NoSchedule
+  - key: CriticalAddonsOnly
+    operator: Exists
+
+controller:
+  env:
+    - name: "OCI_RESOURCE_PRINCIPAL_VERSION"
+      value: "2.2"
+    - name: "OCI_REGION"
+      value: ""
+  envFrom: [ ]
+  resources: { }
+  metrics:
+    port: 8000
+  healthProbe:
+    port: 8081
+
+settings:
+  instanceTypeMetaConfigMapName: oci-instance-type-meta
+  clusterCompartmentId: ""
+  vcnCompartmentId: ""
+  ociVcnIpNative: false
+  ipFamilies: [ IPv4 ]
+  apiserverEndpoint: ""
+  batchMaxDuration: 10s
+  batchIdleDuration: 1s
+  featureGates:
+    spotToSpotConsolidation: false
+    nodeRepair: false

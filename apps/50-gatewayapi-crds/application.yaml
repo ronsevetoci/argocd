@@ -1,23 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 50-gatewayapi-crds
+  name: 50-gateway-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/sync-wave: '50'
 spec:
   project: platform
   source:
-    repoURL: https://github.com/ronsevetoci/argocd.git
-    targetRevision: main
-    path: apps/50-gatewayapi-crds
+    repoURL: oci://docker.io/envoyproxy
+    chart: gateway-crds-helm
+    targetRevision: v1.6.3
     helm:
-      valueFiles:
-        - values.yaml
+      releaseName: eg-crds
+      values: "crds:\n  gatewayAPI:\n    enabled: true\n    channel: standard\n  envoyGateway:\n\
+        \    enabled: true\n"
   destination:
     server: https://kubernetes.default.svc
-    namespace: gateway-system
+    namespace: envoy-gateway-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
