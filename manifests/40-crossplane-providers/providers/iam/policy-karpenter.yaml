@@ -14,5 +14,3 @@ spec:
       - "Allow any-user to manage virtual-network-family in compartment ron.sevet where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
       - "Allow any-user to inspect compartments in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
       - "Allow any-user to {CLUSTER_JOIN} in compartment ron.sevet"
-  providerConfigRef:
-    name: oci-default
