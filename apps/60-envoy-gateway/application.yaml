@@ -8,15 +8,12 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: oci://docker.io/envoyproxy
+    repoURL: oci://docker.io/envoyproxy/gateway-helm 
     chart: gateway-helm
-    targetRevision: v1.6.3
+    targetRevision: v0.0.0-latest
     helm:
-      releaseName: eg
+      releaseName: envoy-proxy
       skipCrds: true
-      values: "deployment:\n  envoyGateway:\n    nodeSelector:\n      name: core\n\
-        \n# Optional: run multiple replicas (needs PDB/HA considerations)\n# deployment:\n\
-        #   replicas: 2\n"
   destination:
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
