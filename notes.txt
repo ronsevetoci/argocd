@@ -1,2 +1,3 @@
 kubectl label nodes -l name=core karpenter.sh/dedicated=true --overwrite
 need pods and worker subnet and nsg ocid for nodeclass
+in iam-provider policy need to input - compartment id and cluster id

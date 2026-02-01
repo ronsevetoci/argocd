@@ -1,0 +1,18 @@
+apiVersion: identity.oci.oraclecloud.com/v1alpha1   # <-- adjust to your installed CRD group/version
+kind: Policy                                        # <-- adjust if provider uses a different Kind name
+metadata:
+  name: pol-karpenter-open
+spec:
+  forProvider:
+    compartmentId: <COMPARTMENT_OCID>               # if the CRD expects compartment OCID (common)
+    name: pol-karpenter-open
+    description: "Workload Identity policy for Karpenter (demo, open but constrained)"
+    statements:
+      - "Allow any-user to manage instance-family in compartment ron.sevet where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
+      - "Allow any-user to manage volumes in compartment ron.sevet where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
+      - "Allow any-user to manage volume-attachments in compartment ron.sevet where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
+      - "Allow any-user to manage virtual-network-family in compartment ron.sevet where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
+      - "Allow any-user to inspect compartments in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'karpenter', request.principal.service_account = '05-karpenter', request.principal.cluster_id = 'ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaavf3sjplaoujrlcnfyi4pzd3yaqmnlycvgzu4efq4lctxcqrsdjaq' }"
+      - "Allow any-user to {CLUSTER_JOIN} in compartment ron.sevet"
+  providerConfigRef:
+    name: oci-default
