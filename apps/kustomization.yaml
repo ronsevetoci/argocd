@@ -11,4 +11,4 @@ resources:
 - ../50-gatewayapi-crds/
 - ../60-envoy-gateway/
 - ../70-gateway-objects/
-- 80-demo-stack-helm/
+- ../80-demo-stack-helm/
