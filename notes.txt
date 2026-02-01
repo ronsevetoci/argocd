@@ -1,3 +1,19 @@
 kubectl label nodes -l name=core karpenter.sh/dedicated=true --overwrite
 need pods and worker subnet and nsg ocid for nodeclass
 in iam-provider policy need to input - compartment id and cluster id
+
+### crossplane creds 
+
+create an API token 
+
+kubectl create secret generic oci-creds \
+--namespace=crossplane-system \
+--from-literal=credentials='{
+"tenancy_ocid": "ocid1.tenancy.oc1..aaaaaaaa4wptnxymnypvjjltnejidchjhz6uimlhru7rdi5qb6qlnmrtgu3a",
+"user_ocid": "ocid1.user.oc1..aaaaaaaaknhw74qs6eiqggfxddc3k24hsi7d3ccinvil6ktlzfjj3uaib4ea",
+"private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC0qx8nLJVQXfGE\ndToeg64G8pCkSIJB3RY3hXCVNpMMF9/MJoL85cPaJRppJiqe2r80uBgd5Vg0Tv+s\nG4eI6YV0F178nE8aGeDD+YVt2qth8qACibNx4S4Jgt/mypc/H7yNNGFv1Y2lvBf6\nQUAh0Q2TK5Ya0gmkwY5cF10ajqa2zngEGAq3kaX6bq9LCF5qKj63BjDmERAXarQ0\nIWw0cFxSlTxoP8UnHV3zYpN/Ap74pjvnzBlYr4SKz4tn2vxpLXnImF6ugkMzgvFW\nT7rhJIrg6Uxtiwjy+HzdBg+PNvuEmOLFal086Wa17kIkqUAdfiz60Rt6Ot47srvB\nNsGaYPFdAgMBAAECggEAC4J2TNwr0/pJeK8w1BZT98iBW0dCQxi8VwOm096tmKuM\nW+4H0hLU0A4lOVXPiR4K6Hx3jtoC7UGAy2cCkqqRJapCfcnQcUDSSfHYufz1sPBQ\nbhugeqyw2TVvoafo4ZeE6c2l4nEX9xsSlPm4sJ7SjvxhHEAivKQBt3oGj0/6Ah3C\n6ouVru/HB2tQE7Ds4h7o/J0w5+i44wgeuDMfU/StBVThXeNXpuDuRmwOOIFQ7rcf\nBy//2d7zdVKkQlxlOfIVExdrqWQUQeIurV0Jt2Yfbw0iHMSHQhrfuTiJu8NlB2fK\n01gFibLwD3rTFf0zHPyCd8laNEyIiF7N3t1WNratAQKBgQDefF5ddv16UiwZFrv2\nIwdtOcXBaL2zlNsZv3gMfU2Qs05Zu58d1tQCpPgj+wolTj6D4UdTr4T7tB8sDUYE\nL0qGDpNr1wh/JB6MzQdt6IJL+qttnRmSk8sGQk4HA2U6fGCGWPP9nz+qjmxEeaQ4\nD7UHnYZXYXXy+wMO/a4iJvbtAQKBgQDP4iqjQvO73ap7aK15+EkwxefRL4HxiJW4\nNIEEFXXZe/mevCNPipU52NER8DD7Xie9sEFfgs36YmrN5X6O74REutzbnUwjNwA/\n4GowMof7Y82E2V3F8RYp2JisSF0eME5rsXpcdwpbwU0CfNiu8zkjOHuUTo8/OyWp\nuoCcdrTYXQKBgH9Eo3JRq8P6F3GumIy/EvN/NcliUgnVH9RFu7VhRCp+91XLRsT5\n68MrfSqP4wjeDlLAXl3XrHmTWrWHTkL8jmPLGLd6hUi9b6BZdGOBum8eEEwers8z\nLdMBwMKwRYrENS8E2WV+YBv/Zp1w++h5y7N0f7GidactwV0k7iRpJ50BAoGAJicg\nJC6ZhRU9wMCJdiU3aZgo35+UfbvPnqskMpettWine5aT9Hk+wgsk8+HdW4UATjQX\nC2x6WUXOzFMeUyVqZSLWfgf0fVIO3apWUtozUtQSWBt8tmN06eEyxAvT60J6YhGE\nn4vJfuWPOLGpIxLInco0BBgW+kfkta3hBNZUgpECgYAPFrBJDhCx3Z565U/+EQ/P\n+/z0zXDpstnkGdx+bdsSIkbKmdzrVxTcNQ1ZtOfpgZM/DcZaLdV414O1BagEdaYP\ntpgtbvCTiXO4MOKlu4YYMqX42UG+pd4TAJ/TJ6BrEh55W6hY4Gk3gyY582ZE++xI\nS2hGPud/Wrdp4GNpn3rwiQ==\n-----END PRIVATE KEY-----\nOCI_API_KEY\n",
+"fingerprint": "cd:13:de:9f:4b:11:55:27:c3:81:b4:08:7b:33:26:c8",
+"region": "eu-frankfurt-1"
+}'
+
+https://github.com/oracle/crossplane-provider-oci/blob/main/docs/quickstart.md
