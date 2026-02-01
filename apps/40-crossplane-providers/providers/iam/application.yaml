@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 40-crossplane-providers
+  name: iam-provider
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "40"
+    argocd.argoproj.io/sync-wave: "45"
 spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: apps/40-crossplane-providers/providers
+    path: manifests/40-crossplane-providers/providers/iam
   destination:
     server: https://kubernetes.default.svc
     namespace: crossplane-system
