@@ -1,24 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 06-karpenter-nodepools
+  name: 40-iam-karpenter
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/sync-wave: "40"
 spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: manifests/06-karpenter-nodepools/manifests
+    path: manifests/40-iam-karpenter/provider.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: karpenter
+    namespace: crossplane-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       # - CreateNamespace=true
-      # Helpful when CRDs/webhooks are still being established during bootstrap:
+      # IAM resources are often CRDs; this avoids early dry-run failures:
       - SkipDryRunOnMissingResource=true
