@@ -8,9 +8,9 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://github.com/ronsevetoci/argocd.git
-    targetRevision: main
-    path: apps/05-karpenter
+    repoURL: oci://phx.ocir.io/id9y6mi8tcky
+    chart: karpenter-provider-oci
+    targetRevision: "0.1.107"   # <-- chart version (NOT image tag unless you aligned them)
     helm:
       valueFiles:
         - values.yaml
@@ -21,3 +21,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
