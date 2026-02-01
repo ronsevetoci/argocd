@@ -1,0 +1,31 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: karpenter-preemptible
+spec:
+  template:
+    spec:
+      expireAfter: Never
+      nodeClassRef:
+        group: oci.oraclecloud.com
+        kind: OCINodeClass
+        name: karpenter1
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: [spot]
+        - key: oci.oraclecloud.com/instance-shape
+          operator: In
+          values:
+            - VM.Standard.E3.Flex
+            - VM.Standard.E4.Flex
+            - VM.Standard.E5.Flex
+      terminationGracePeriod: 120m
+  disruption:
+    budgets:
+      - nodes: 5%
+    consolidateAfter: 60m
+    consolidationPolicy: WhenEmpty
+  limits:
+    cpu: 20
+    memory: 160Gi
