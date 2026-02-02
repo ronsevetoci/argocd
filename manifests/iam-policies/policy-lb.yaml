@@ -10,4 +10,4 @@ spec:
     statements:
       - "Allow any-user to manage load-balancers in compartment ron.sevet"
       - "Allow any-user to use virtual-network-family in compartment ron.sevet"
-      - "Allow any-user to manage network-security-groups in compartment ron.sevet where"
+      - "Allow any-user to manage network-security-groups in compartment ron.sevet"
