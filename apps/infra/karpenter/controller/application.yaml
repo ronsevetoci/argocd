@@ -1,16 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 06-karpenter-nodepools
+  name: karpenter-controller
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
+    path: manifests/karpenter/chart
     targetRevision: main
-    path: manifests/06-karpenter-nodepools/manifests
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: karpenter
@@ -19,6 +22,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      # - CreateNamespace=true
-      # Helpful when CRDs/webhooks are still being established during bootstrap:
-      - SkipDryRunOnMissingResource=true
+      - CreateNamespace=true

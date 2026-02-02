@@ -1,20 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 70-gateway-objects
+  name: karpenter-nodepools
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "70"
+    argocd.argoproj.io/sync-wave: "7"
 spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: manifests/70-gateway-objects/manifests
+    path: manifests/karpenter-nodepools
   destination:
     server: https://kubernetes.default.svc
-    namespace: gateway-system
+    namespace: karpenter
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      # - CreateNamespace=true
+      # Helpful when CRDs/webhooks are still being established during bootstrap:
+      - SkipDryRunOnMissingResource=true
