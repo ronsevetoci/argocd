@@ -14,7 +14,7 @@ spec:
     displayName: mysqldbsystem1        #Optional_field
     subnetId: "ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra"
     adminPasswordSecretRef:
-      key: pass            # Key within the Secret
-      name: mysql-db-admin-secret     # Secret name
+      key: MYSQL_PASSWORD            # Key within the Secret
+      name: {{ .Values.dbSecret.name }}    # Secret name
       namespace: {{ .Values.namespace }}    # Secret namespace
-    adminUsername: myadminuser        # Administrative username
+    adminUsername: admin        # Administrative username
