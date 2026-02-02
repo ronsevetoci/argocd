@@ -18,3 +18,6 @@ spec:
       name: {{ .Values.dbSecret.name }}    # Secret name
       namespace: {{ .Values.namespace }}    # Secret namespace
     adminUsername: admin        # Administrative username
+    writeConnectionSecretToRef:
+      name: mysqldbsystem1-conn
+      namespace: {{ .Values.namespace }}

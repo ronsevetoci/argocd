@@ -14,3 +14,6 @@ spec:
     nodeMemoryInGbs: 2
     softwareVersion: REDIS_7_0
     subnetId: "ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra"
+    writeConnectionSecretToRef:
+      name: rediscluster1-conn
+      namespace: {{ .Values.namespace }}
