@@ -1,21 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 50-gatewayapi-crds
+  name: gateway-objects
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/sync-wave: "25"
 spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: manifests/50-gatewayapi-crds
-    directory:
-      recurse: true
+    path: manifests/gatewayapi-objects
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true

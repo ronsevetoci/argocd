@@ -13,7 +13,7 @@ spec:
     path: manifests/iam-policies
   destination:
     server: https://kubernetes.default.svc
-    namespace: crossplane-system
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
