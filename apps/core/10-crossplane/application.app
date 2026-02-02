@@ -4,7 +4,7 @@ metadata:
   name: crossplane
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "40"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   project: platform
   source:
