@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: 40-crossplane-providers
+  name: crossplane
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "40"
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
     targetRevision: main
-    path: apps/40-crossplane-providers/providers
+    path: apps/infra/crossplane
     directory:
       recurse: true
   destination:
