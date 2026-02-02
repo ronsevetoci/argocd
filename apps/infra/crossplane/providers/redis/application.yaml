@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis-provider
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/ronsevetoci/argocd.git
+    targetRevision: main
+    path: manifests/crossplane-providers/providers/redis
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # - CreateNamespace=true
+      # redis resources are often CRDs; this avoids early dry-run failures:
+      - SkipDryRunOnMissingResource=true
