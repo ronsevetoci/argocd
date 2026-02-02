@@ -1,0 +1,33 @@
+namespace: demo
+
+image:
+  repository: fra.ocir.io/frsxwtjslf35/demo-api
+  tag: "v0.1.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+service:
+  port: 8080
+
+redis:
+  host: "redis.demo.svc.cluster.local"
+  port: 6379
+
+mysql:
+  host: "mysql.demo.svc.cluster.local"
+  port: 3306
+  database: "demo"
+
+dbSecret:
+  name: "demo-db-conn"
+
+gateway:
+  parentGatewayName: "eg"
+  parentGatewayNamespace: "envoy-gateway-system"
+  hostname: ""
+  pathPrefix: "/"
