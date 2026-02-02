@@ -1,15 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  namespace: argocd
   name: root
 spec:
   project: default
   source:
     path: apps/core
     repoURL: https://github.com/ronsevetoci/argocd.git
-    targetRevision: HEAD
+    targetRevision: main
     directory:
       recurse: true
   destination:
     namespace: argocd
     server: 'https://kubernetes.default.svc'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
