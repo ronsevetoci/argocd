@@ -5,7 +5,7 @@ metadata:
     testing.upbound.io/example-name: mysqldbsystem_label_1
   name: mysqldbsystem1
 spec:
-publishConnectionDetailsTo:
+  publishConnectionDetailsTo:
     name: {{ .Values.connections.mysql.secretName }}
     namespace: {{ .Values.namespace }}
   forProvider:
