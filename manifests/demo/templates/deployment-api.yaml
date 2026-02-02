@@ -20,17 +20,39 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-          envFrom:
-            - configMapRef:
-                name: demo-api-config
           env:
-            - name: MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.dbSecret.name }}
-                  key: MYSQL_USER
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.dbSecret.name }}
-                  key: MYSQL_PASSWORD
+          - name: REDIS_HOST
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.connections.redis.secretName }}
+                key: {{ .Values.connections.redis.hostKey }}
+          - name: REDIS_PORT
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.connections.redis.secretName }}
+                key: {{ .Values.connections.redis.portKey }}
+
+          - name: MYSQL_HOST
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.connections.mysql.secretName }}
+                key: {{ .Values.connections.mysql.hostKey }}
+          - name: MYSQL_PORT
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.connections.mysql.secretName }}
+                key: {{ .Values.connections.mysql.portKey }}
+
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.connections.mysql.secretName }}
+                key: {{ .Values.connections.mysql.usernameKey }}
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.connections.mysql.secretName }}
+                key: {{ .Values.connections.mysql.passwordKey }}
+
+          - name: MYSQL_DB
+            value: {{ .Values.connections.mysql.database | quote }}

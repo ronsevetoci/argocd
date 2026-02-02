@@ -31,3 +31,19 @@ gateway:
   parentGatewayNamespace: "envoy-gateway-system"
   hostname: ""
   pathPrefix: "/"
+
+connections:
+  redis:
+    secretName: demo-redis-conn
+    hostKey: endpoint
+    portKey: port
+    # alternatively, some providers publish "host" / "uri" etc.
+
+  mysql:
+    secretName: demo-mysql-conn
+    hostKey: endpoint
+    portKey: port
+    usernameKey: username
+    passwordKey: password
+    database: demo
+
