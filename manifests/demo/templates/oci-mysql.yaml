@@ -5,6 +5,9 @@ metadata:
     testing.upbound.io/example-name: mysqldbsystem_label_1
   name: mysqldbsystem1
 spec:
+publishConnectionDetailsTo:
+    name: {{ .Values.connections.mysql.secretName }}
+    namespace: {{ .Values.namespace }}
   forProvider:
     # Refer to following terraform example for brief resource fields
     # https://registry.terraform.io/providers/oracle/oci/7.27.0/docs/resources/mysql_mysql_db_system
@@ -18,6 +21,3 @@ spec:
       name: {{ .Values.dbSecret.name }}    # Secret name
       namespace: {{ .Values.namespace }}    # Secret namespace
     adminUsername: admin        # Administrative username
-    writeConnectionSecretToRef:
-      name: mysqldbsystem1-conn
-      namespace: {{ .Values.namespace }}

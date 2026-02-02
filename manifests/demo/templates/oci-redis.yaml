@@ -5,6 +5,9 @@ metadata:
     testing.upbound.io/example-name: rediscluster_label_1
   name: rediscluster1
 spec:
+  publishConnectionDetailsTo:
+    name: {{ .Values.connections.redis.secretName }}
+    namespace: {{ .Values.namespace }}
   forProvider:
     # Refer to following terraform example for brief resource fields
     # https://registry.terraform.io/providers/oracle/oci/7.27.0/docs/resources/redis_redis_cluster
@@ -14,6 +17,3 @@ spec:
     nodeMemoryInGbs: 2
     softwareVersion: REDIS_7_0
     subnetId: "ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra"
-    writeConnectionSecretToRef:
-      name: rediscluster1-conn
-      namespace: {{ .Values.namespace }}
