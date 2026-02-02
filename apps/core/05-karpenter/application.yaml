@@ -9,7 +9,7 @@ spec:
   project: platform
   source:
     repoURL: https://github.com/ronsevetoci/argocd.git
-    path: manifests/05-karpenter/chart
+    path: manifests/karpenter/chart
     targetRevision: main
     helm:
       valueFiles:
