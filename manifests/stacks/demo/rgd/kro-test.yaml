@@ -12,6 +12,8 @@ spec:
       compartmentId: string
       subnetId: string
       softwareVersion: string | default="REDIS_7_0"
+      nodeCount: integer | default=1
+      nodeMemoryInGbs: integer | default=2
 
   resources:
     - id: redisCluster
@@ -26,6 +28,8 @@ spec:
             displayName: ${schema.spec.name}-redis
             subnetId: ${schema.spec.subnetId}
             softwareVersion: ${schema.spec.softwareVersion}
+            nodeCount: ${schema.spec.nodeCount}
+            nodeMemoryInGbs: ${schema.spec.nodeMemoryInGbs}
           # if providerConfigRef breaks KRO, keep it out for now
           # providerConfigRef:
           #   name: default
