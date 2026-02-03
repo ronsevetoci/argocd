@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     chart: kro
-    repoURL: registry.k8s.io/kro/charts/kro
+    repoURL: registry.k8s.io/kro/charts
     targetRevision: 0.8.1
   destination:
     namespace: kro
