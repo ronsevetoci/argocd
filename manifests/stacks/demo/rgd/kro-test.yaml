@@ -12,8 +12,8 @@ spec:
       compartmentId: string
       subnetId: string
       softwareVersion: string | default="REDIS_7_0"
-      nodeCount: integer | default=1.0
-      nodeMemoryInGbs: integer | default=2.0
+      nodeCount: number | default=1.0
+      nodeMemoryInGbs: number | default=2.0
 
   resources:
     - id: redisCluster
