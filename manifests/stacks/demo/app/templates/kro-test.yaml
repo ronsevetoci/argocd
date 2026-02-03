@@ -1,7 +1,3 @@
-apiVersion: kro.run/v1alpha1
-kind: ResourceGraphDefinition
-metadata:
-  name: redis-appstack
 spec:
   schema:
     apiVersion: v1alpha1
@@ -9,17 +5,11 @@ spec:
     spec:
       name: string | default="demo"
       namespace: string | default="demo"
-
       compartmentId: string
       subnetId: string
-
       nodeCount: float | default=1
       nodeMemoryInGbs: float | default=2
       softwareVersion: string | default="REDIS_7_0"
-
-    status:
-      redisFqdn: ${redisCluster.status.atProvider.primaryFqdn}
-      redisState: ${redisCluster.status.atProvider.state}
 
   resources:
     - id: redisCluster
@@ -29,15 +19,14 @@ spec:
         metadata:
           name: ${schema.spec.name}-redis
         spec:
-           forProvider:
-            compartmentId: ${spec.compartmentId}
-            displayName: ${spec.name}-redis
-            subnetId: ${spec.subnetId}
-            nodeCount: ${spec.nodeCount}
-            nodeMemoryInGbs: ${spec.nodeMemoryInGbs}
-            softwareVersion: ${spec.softwareVersion}
-      readyWhen:
-        - ${redisCluster.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
+          forProvider:
+            compartmentId: ${schema.spec.compartmentId}
+            displayName: ${schema.spec.name}-redis
+            subnetId: ${schema.spec.subnetId}
+            nodeCount: ${schema.spec.nodeCount}
+            nodeMemoryInGbs: ${schema.spec.nodeMemoryInGbs}
+            softwareVersion: ${schema.spec.softwareVersion}
+          # keep providerConfigRef OUT for now if it breaks KRO build
 
     - id: redisConnSecret
       template:
@@ -48,6 +37,5 @@ spec:
           namespace: ${schema.spec.namespace}
         type: Opaque
         stringData:
-            host: ${redisCluster.status.atProvider.primaryFqdn}
-            port: "6379"
-
+          host: ${redisCluster.status.atProvider.primaryFqdn}
+          port: "6379"
