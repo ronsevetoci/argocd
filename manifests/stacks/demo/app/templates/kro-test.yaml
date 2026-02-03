@@ -36,8 +36,6 @@ spec:
             nodeCount: ${spec.nodeCount}
             nodeMemoryInGbs: ${spec.nodeMemoryInGbs}
             softwareVersion: ${spec.softwareVersion}
-        providerConfigRef:
-            name: default
       readyWhen:
         - ${redisCluster.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
 
