@@ -1,0 +1,12 @@
+apiVersion: kro.run/v1alpha1
+kind: RedisAppStack
+metadata:
+  name: demo
+spec:
+  name: demo
+  namespace: demo
+
+  compartmentId: ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa
+  subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra
+
+  redisSecretName: demo-redis-conn
