@@ -1,26 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: envoy-gateway
+  name: kro
   namespace: argocd
 spec:
   project: default
   source:
-    chart: gateway-helm
-    repoURL: docker.io/envoyproxy
-    targetRevision: v0.0.0-latest
+    chart: kro
+    repoURL: registry.k8s.io/kro/charts/kro
+    targetRevision: 0.8.1
     helm:
-      releaseName: envoy-gateway
-      values: |
-        certgen:a
-          enabled: false
+      releaseName: kro
   destination:
-    namespace: envoy-gateway-system
+    namespace: kro
     server: https://kubernetes.default.svc
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
-    - ServerSideApply=true
     automated:
       prune: true
       selfHeal: true
