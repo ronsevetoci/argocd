@@ -1,3 +1,7 @@
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: redis-appstack
 spec:
   schema:
     apiVersion: v1alpha1
@@ -26,7 +30,11 @@ spec:
             nodeCount: ${schema.spec.nodeCount}
             nodeMemoryInGbs: ${schema.spec.nodeMemoryInGbs}
             softwareVersion: ${schema.spec.softwareVersion}
-          # keep providerConfigRef OUT for now if it breaks KRO build
+          # if providerConfigRef breaks KRO, keep it out for now
+          # providerConfigRef:
+          #   name: default
+      readyWhen:
+        - ${redisCluster.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
 
     - id: redisConnSecret
       template:
