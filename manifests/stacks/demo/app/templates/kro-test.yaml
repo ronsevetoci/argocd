@@ -4,34 +4,24 @@ metadata:
   name: redis-appstack
 spec:
   schema:
-    apiVersion: platform.demo/v1alpha1
+    apiVersion: v1alpha1
     kind: RedisAppStack
     spec:
-      # ---- inputs you want the dev/team to set ----
       name: string | default="demo"
       namespace: string | default="demo"
 
-      # OCI bits (keep minimal; you can hardcode later if you want)
       compartmentId: string
       subnetId: string
 
-      # Redis sizing knobs (optional)
       nodeCount: integer | default=1
       nodeMemoryInGbs: integer | default=2
       softwareVersion: string | default="REDIS_7_0"
-
-      # App (optional in this RGD; you can remove if you only want infra+secret)
-      app:
-        enabled: boolean | default=true
-        image: string
-        replicas: integer | default=1
 
     status:
       redisFqdn: ${redisCluster.status.atProvider.primaryFqdn}
       redisState: ${redisCluster.status.atProvider.state}
 
   resources:
-    # 1) Crossplane OCI RedisCluster
     - id: redisCluster
       template:
         apiVersion: redis.oci.upbound.io/v1alpha1
@@ -46,19 +36,11 @@ spec:
             nodeCount: ${schema.spec.nodeCount}
             nodeMemoryInGbs: ${schema.spec.nodeMemoryInGbs}
             softwareVersion: ${schema.spec.softwareVersion}
-
-          # Keep this if you want, even if the provider publishes nothing today
-          writeConnectionSecretToRef:
-            name: ${schema.spec.name}-redis-raw
-            namespace: ${schema.spec.namespace}
-
-      # Make KRO wait until Crossplane marks the MR ready.
-      # (KRO supports readyWhen expressions) :contentReference[oaicite:1]{index=1}
+          providerConfigRef:
+            name: default
       readyWhen:
         - ${redisCluster.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
 
-    # 2) “Normalized” connection Secret (what the app consumes)
-    # This is the key part: it pulls FQDN from redisCluster.status.atProvider.primaryFqdn
     - id: redisConnSecret
       template:
         apiVersion: v1
@@ -70,38 +52,3 @@ spec:
         stringData:
           host: ${redisCluster.status.atProvider.primaryFqdn}
           port: "6379"
-
-    # 3) Optional app Deployment that consumes the Secret
-    - id: appDeployment
-      includeWhen:
-        - ${schema.spec.app.enabled}
-      template:
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: ${schema.spec.name}-api
-          namespace: ${schema.spec.namespace}
-        spec:
-          replicas: ${schema.spec.app.replicas}
-          selector:
-            matchLabels:
-              app: ${schema.spec.name}-api
-          template:
-            metadata:
-              labels:
-                app: ${schema.spec.name}-api
-            spec:
-              containers:
-                - name: api
-                  image: ${schema.spec.app.image}
-                  env:
-                    - name: REDIS_HOST
-                      valueFrom:
-                        secretKeyRef:
-                          name: ${schema.spec.name}-redis-conn
-                          key: host
-                    - name: REDIS_PORT
-                      valueFrom:
-                        secretKeyRef:
-                          name: ${schema.spec.name}-redis-conn
-                          key: port
