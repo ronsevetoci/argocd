@@ -12,7 +12,7 @@ spec:
       compartmentId: string
       subnetId: string
       softwareVersion: string | default="REDIS_7_0"
-      nodeCount: double | default=1
+      nodeCount: integer | default=1
       nodeMemoryInGbs: integer | default=2
 
   resources:
