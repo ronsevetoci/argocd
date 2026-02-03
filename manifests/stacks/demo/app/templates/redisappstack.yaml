@@ -8,6 +8,6 @@ spec:
 
   compartmentId: ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa
   subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra
-  nodeCount: 1
-  nodeMemoryInGbs: 2
+  nodeCount: 1.0
+  nodeMemoryInGbs: 2.0
   redisSecretName: demo-redis-conn
