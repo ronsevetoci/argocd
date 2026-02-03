@@ -11,8 +11,6 @@ spec:
       namespace: string | default="demo"
       compartmentId: string
       subnetId: string
-      nodeCount: float | default=1.0
-      nodeMemoryInGbs: float | default=2.0
       softwareVersion: string | default="REDIS_7_0"
 
   resources:
@@ -27,8 +25,6 @@ spec:
             compartmentId: ${schema.spec.compartmentId}
             displayName: ${schema.spec.name}-redis
             subnetId: ${schema.spec.subnetId}
-            nodeCount: ${schema.spec.nodeCount}
-            nodeMemoryInGbs: ${schema.spec.nodeMemoryInGbs}
             softwareVersion: ${schema.spec.softwareVersion}
           # if providerConfigRef breaks KRO, keep it out for now
           # providerConfigRef:
