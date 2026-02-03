@@ -11,8 +11,8 @@ spec:
       namespace: string | default="demo"
       compartmentId: string
       subnetId: string
-      nodeCount: float | default=1
-      nodeMemoryInGbs: float | default=2
+      nodeCount: float | default=1.0
+      nodeMemoryInGbs: float | default=2.0
       softwareVersion: string | default="REDIS_7_0"
 
   resources:
