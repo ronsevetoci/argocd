@@ -21,30 +21,3 @@ spec:
             compartmentId: ${schema.spec.compartmentId}
             subnetId: ${schema.spec.subnetId}
             nodeCount: 1
-
-    # 3. Application Deployment
-    - id: appServer
-      template:
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: ${schema.metadata.name}-app
-        spec:
-          template:
-            spec:
-              containers:
-                - name: main
-                  image: ${schema.spec.appImage}
-                  env:
-                    # FETCH FQDN FROM STATUS (The Plain Solution)
-                    - name: DB_HOST
-                      value: ${mysqlDb.status.atProvider.endpoints[0].hostname}
-                    - name: REDIS_HOST
-                      value: ${redisCluster.status.atProvider.primaryEndpoint}
-                    
-                    # FETCH PASSWORD FROM GENERATED SECRET
-                    - name: DB_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                          name: ${schema.metadata.name}-mysql-conn
-                          key: password
