@@ -28,8 +28,8 @@ spec:
             displayName: ${schema.spec.name}-redis
             subnetId: ${schema.spec.subnetId}
             softwareVersion: ${schema.spec.softwareVersion}
-            nodeCount: ${integer{schema.spec.nodeCount}}
-            nodeMemoryInGbs: ${integer{schema.spec.nodeMemoryInGbs}}
+            nodeCount: ${integer(schema.spec.nodeCount)}
+            nodeMemoryInGbs: ${integer(schema.spec.nodeMemoryInGbs)}
           # if providerConfigRef breaks KRO, keep it out for now
           # providerConfigRef:
           #   name: default
