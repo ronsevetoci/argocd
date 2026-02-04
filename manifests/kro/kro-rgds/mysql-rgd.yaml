@@ -1,7 +1,7 @@
 apiVersion: kro.run/v1alpha1
 kind: ResourceGraphDefinition
 metadata:
-  name: mysqlappstacks.oci.platform.com
+  name: mysqlappstacks.oci.platform.com  # Group is oci.platform.com
 spec:
   schema:
     apiVersion: v1alpha1
@@ -13,8 +13,7 @@ spec:
       subnetId: string
       shapeName: string | default="MySQL.2"
       availabilityDomain: string | default="Vihs:EU-FRANKFURT-1-AD-1"
-      adminPasswordSecret: string # Name of the manual init secret
-
+      adminPasswordSecret: string
   resources:
     - id: mysqlDb
       template:
@@ -37,7 +36,6 @@ spec:
               name: ${schema.spec.adminPasswordSecret}
               namespace: ${schema.spec.namespace}
               key: MYSQL_PASSWORD
-
     - id: mysqlConnSecret
       template:
         apiVersion: v1
@@ -47,6 +45,5 @@ spec:
           namespace: ${schema.spec.namespace}
         type: Opaque
         stringData:
-          # Discovery: wait for OCI to assign the FQDN
           host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
           port: "3306"

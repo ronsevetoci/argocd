@@ -1,4 +1,4 @@
-apiVersion: v1alpha1
+apiVersion: oci.platform.com/v1alpha1  # Matches the RGD Group
 kind: MysqlAppStack
 metadata:
   name: demo-db-request
