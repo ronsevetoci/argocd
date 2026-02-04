@@ -31,28 +31,3 @@ spec:
               secretKeyRef:
                 name: {{ .Values.connections.redis.secretName }}
                 key: {{ .Values.connections.redis.portKey }}
-
-          - name: MYSQL_HOST
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
-                key: {{ .Values.connections.mysql.hostKey }}
-          - name: MYSQL_PORT
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
-                key: {{ .Values.connections.mysql.portKey }}
-
-          - name: MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
-                key: {{ .Values.connections.mysql.usernameKey }}
-          - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
-                key: {{ .Values.connections.mysql.passwordKey }}
-
-          - name: MYSQL_DB
-            value: {{ .Values.connections.mysql.database | quote }}
