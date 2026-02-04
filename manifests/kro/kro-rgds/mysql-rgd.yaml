@@ -1,7 +1,7 @@
 apiVersion: kro.run/v1alpha1
 kind: ResourceGraphDefinition
 metadata:
-  name: mysqlappstacks.oci.platform.com  # Group is oci.platform.com
+  name: mysqlappstacks.kro.run
 spec:
   schema:
     apiVersion: v1alpha1
@@ -23,6 +23,7 @@ spec:
           name: ${schema.spec.name}-mysql
         spec:
           writeConnectionSecretToRef:
+            # Crossplane writes credentials here
             name: ${schema.spec.name}-mysql-creds
             namespace: ${schema.spec.namespace}
           forProvider:
@@ -45,5 +46,6 @@ spec:
           namespace: ${schema.spec.namespace}
         type: Opaque
         stringData:
+          # Discovery: wait for OCI status to populate the hostname
           host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
           port: "3306"
