@@ -1,7 +1,7 @@
 apiVersion: kro.run/v1alpha1
 kind: ResourceGraphDefinition
 metadata:
-  name: oci-data-stacks.platform.com
+  name: redisgraph
 spec:
   schema:
     apiVersion: v1alpha1
@@ -11,26 +11,6 @@ spec:
       subnetId: string
       appImage: string
   resources:
-    # 1. MySQL Resource
-    - id: mysqlDb
-      template:
-        apiVersion: mysql.oci.upbound.io/v1alpha1
-        kind: MysqlDbSystem
-        spec:
-          forProvider:
-            compartmentId: ${schema.spec.compartmentId}
-            subnetId: ${schema.spec.subnetId}
-            shapeName: "MySQL.Free"
-            adminUsername: "admin"
-            adminPasswordSecretRef:
-              name: ${schema.metadata.name}-mysql-admin
-              namespace: ${schema.metadata.namespace}
-              key: password
-          # Crossplane generates this secret for CREDENTIALS
-          writeConnectionSecretToRef:
-            name: ${schema.metadata.name}-mysql-conn
-            namespace: ${schema.metadata.namespace}
-
     # 2. Redis Resource
     - id: redisCluster
       template:
