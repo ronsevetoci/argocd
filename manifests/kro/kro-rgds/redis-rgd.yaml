@@ -1,0 +1,70 @@
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: oci-data-stacks.platform.com
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: OCIDataStack
+    spec:
+      compartmentId: string
+      subnetId: string
+      appImage: string
+  resources:
+    # 1. MySQL Resource
+    - id: mysql-db
+      template:
+        apiVersion: mysql.oci.upbound.io/v1alpha1
+        kind: MysqlDbSystem
+        spec:
+          forProvider:
+            compartmentId: ${schema.spec.compartmentId}
+            subnetId: ${schema.spec.subnetId}
+            shapeName: "MySQL.Free"
+            adminUsername: "admin"
+            adminPasswordSecretRef:
+              name: ${schema.metadata.name}-mysql-admin
+              namespace: ${schema.metadata.namespace}
+              key: password
+          # Crossplane generates this secret for CREDENTIALS
+          writeConnectionSecretToRef:
+            name: ${schema.metadata.name}-mysql-conn
+            namespace: ${schema.metadata.namespace}
+
+    # 2. Redis Resource
+    - id: redis-cluster
+      template:
+        apiVersion: redis.oci.upbound.io/v1alpha1
+        kind: RedisCluster
+        spec:
+          forProvider:
+            compartmentId: ${schema.spec.compartmentId}
+            subnetId: ${schema.spec.subnetId}
+            nodeCount: 1
+
+    # 3. Application Deployment
+    - id: app-server
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ${schema.metadata.name}-app
+        spec:
+          template:
+            spec:
+              containers:
+                - name: main
+                  image: ${schema.spec.appImage}
+                  env:
+                    # FETCH FQDN FROM STATUS (The Plain Solution)
+                    - name: DB_HOST
+                      value: ${mysql-db.status.atProvider.endpoints[0].hostname}
+                    - name: REDIS_HOST
+                      value: ${redis-cluster.status.atProvider.primaryEndpoint}
+                    
+                    # FETCH PASSWORD FROM GENERATED SECRET
+                    - name: DB_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${schema.metadata.name}-mysql-conn
+                          key: password
