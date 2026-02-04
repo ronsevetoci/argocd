@@ -1,14 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kro-stack
+  name: kro-rgds
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
 spec:
   project: default
   source:
-    chart: kro
-    repoURL: registry.k8s.io/kro/charts
-    targetRevision: 0.8.1
+    repoURL: https://github.com/ronsevetoci/argocd.git
+    targetRevision: main
+    path: manifests/kro/kro-rgds
   destination:
     namespace: kro
     server: https://kubernetes.default.svc
