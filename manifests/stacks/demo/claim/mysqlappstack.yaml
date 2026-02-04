@@ -1,0 +1,10 @@
+apiVersion: oci.platform.com/v1alpha1
+kind: MysqlAppStack
+metadata:
+  name: prod-db
+spec:
+  name: prod-db
+  namespace: demo
+  compartmentId: ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa
+  subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra
+  adminPasswordSecret: "mysql-init-pwd"

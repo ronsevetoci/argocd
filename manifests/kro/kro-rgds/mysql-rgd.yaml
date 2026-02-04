@@ -1,7 +1,7 @@
 apiVersion: kro.run/v1alpha1
 kind: ResourceGraphDefinition
 metadata:
-  name: mysql-appstack
+  name: mysql-appstacks.oci.platform.com
 spec:
   schema:
     apiVersion: v1alpha1
@@ -13,8 +13,11 @@ spec:
       subnetId: string
       shapeName: string | default="MySQL.2"
       availabilityDomain: string | default="Vihs:EU-FRANKFURT-1-AD-1"
+      # Initial password secret reference provided by the user
+      adminPasswordSecret: string
 
   resources:
+    # --- 1. OCI MySQL DB System (The Managed Infrastructure) ---
     - id: mysqlDb
       template:
         apiVersion: mysql.oci.upbound.io/v1alpha1
@@ -22,9 +25,9 @@ spec:
         metadata:
           name: ${schema.spec.name}-mysql
         spec:
-          # Crossplane will write the finalized connection details (creds) here
+          # Crossplane will write credentials (user/pass) here
           writeConnectionSecretToRef:
-            name: ${schema.spec.name}-mysql-conn
+            name: ${schema.spec.name}-mysql-creds
             namespace: ${schema.spec.namespace}
           forProvider:
             availabilityDomain: ${schema.spec.availabilityDomain}
@@ -33,12 +36,12 @@ spec:
             displayName: ${schema.spec.name}-mysql
             subnetId: ${schema.spec.subnetId}
             adminUsername: "admin"
-            # Reference the secret you created manually for the initial password
             adminPasswordSecretRef:
-              name: ${schema.spec.name}-mysql-admin-pwd
+              name: ${schema.spec.adminPasswordSecret}
               namespace: ${schema.spec.namespace}
               key: MYSQL_PASSWORD
 
+    # --- 2. Dynamic Connection Secret (The Discovery Layer) ---
     - id: mysqlConnSecret
       template:
         apiVersion: v1
@@ -48,6 +51,6 @@ spec:
           namespace: ${schema.spec.namespace}
         type: Opaque
         stringData:
-          # Pulling the FQDN from the first element of the endpoints array
+          # CEL expression to grab the first endpoint from the OCI status array
           host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
           port: "3306"
