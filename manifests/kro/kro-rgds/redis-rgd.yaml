@@ -32,7 +32,7 @@ spec:
             namespace: ${schema.metadata.namespace}
 
     # 2. Redis Resource
-    - id: redis-cluster
+    - id: redisCluster
       template:
         apiVersion: redis.oci.upbound.io/v1alpha1
         kind: RedisCluster
@@ -60,7 +60,7 @@ spec:
                     - name: DB_HOST
                       value: ${mysqlDb.status.atProvider.endpoints[0].hostname}
                     - name: REDIS_HOST
-                      value: ${redis-cluster.status.atProvider.primaryEndpoint}
+                      value: ${redisCluster.status.atProvider.primaryEndpoint}
                     
                     # FETCH PASSWORD FROM GENERATED SECRET
                     - name: DB_PASSWORD
