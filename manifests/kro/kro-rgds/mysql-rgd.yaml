@@ -20,32 +20,35 @@ spec:
         apiVersion: mysql.oci.upbound.io/v1alpha1
         kind: MysqlDbSystem
         metadata:
-          name: ${schema.spec.name}-mysql
+          name: ${schema.spec.name}
+          # Matches your working labels
+          labels:
+            testing.upbound.io/example-name: ${schema.spec.name}-label
         spec:
           writeConnectionSecretToRef:
-            # Crossplane writes credentials here
-            name: ${schema.spec.name}-mysql-creds
+            name: ${schema.spec.name}-mysql-conn
             namespace: ${schema.spec.namespace}
           forProvider:
             availabilityDomain: ${schema.spec.availabilityDomain}
             compartmentId: ${schema.spec.compartmentId}
             shapeName: ${schema.spec.shapeName}
-            displayName: ${schema.spec.name}-mysql
+            displayName: ${schema.spec.name}
             subnetId: ${schema.spec.subnetId}
             adminUsername: "admin"
             adminPasswordSecretRef:
               name: ${schema.spec.adminPasswordSecret}
               namespace: ${schema.spec.namespace}
               key: MYSQL_PASSWORD
+
     - id: mysqlConnSecret
       template:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: ${schema.spec.name}-mysql-endpoint
+          name: ${schema.spec.name}-endpoint
           namespace: ${schema.spec.namespace}
         type: Opaque
         stringData:
-          # Discovery: wait for OCI status to populate the hostname
+          # This line makes KRO wait for the DB to be active in OCI
           host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
           port: "3306"
