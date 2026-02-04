@@ -1,24 +1,49 @@
 apiVersion: kro.run/v1alpha1
 kind: ResourceGraphDefinition
 metadata:
-  name: redisgraph
+  name: redis-appstack
 spec:
   schema:
     apiVersion: v1alpha1
-    kind: OCIDataStack
+    kind: RedisAppStack
     spec:
+      name: string | default="demo"
+      namespace: string | default="demo"
       compartmentId: string
       subnetId: string
-      appImage: string
+      softwareVersion: string | default="REDIS_7_0"
+      nodeCount: 1
+      nodeMemoryInGbs: 2
+
   resources:
-    # 2. Redis Resource
     - id: redisCluster
       template:
         apiVersion: redis.oci.upbound.io/v1alpha1
         kind: RedisCluster
+        metadata:
+          name: ${schema.spec.name}-redis
         spec:
           forProvider:
             compartmentId: ${schema.spec.compartmentId}
+            displayName: ${schema.spec.name}-redis
             subnetId: ${schema.spec.subnetId}
-            nodeCount: 1
-            memorySizeInGBs: 2
+            softwareVersion: ${schema.spec.softwareVersion}
+            nodeCount: ${schema.spec.nodeCount}
+            nodeMemoryInGbs: ${schema.spec.nodeMemoryInGbs}
+          # if providerConfigRef breaks KRO, keep it out for now
+          # providerConfigRef:
+          #   name: default
+      readyWhen:
+        - ${redisCluster.status.conditions.exists(c, c.type == "Ready" && c.status == "True")}
+
+    - id: redisConnSecret
+      template:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: ${schema.spec.name}-redis-conn
+          namespace: ${schema.spec.namespace}
+        type: Opaque
+        stringData:
+          host: ${redisCluster.status.atProvider.primaryFqdn}
+          port: "6379"
