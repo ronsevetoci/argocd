@@ -21,3 +21,4 @@ spec:
             compartmentId: ${schema.spec.compartmentId}
             subnetId: ${schema.spec.subnetId}
             nodeCount: 1
+            memorySizeInGBs: 2
