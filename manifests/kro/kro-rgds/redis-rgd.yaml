@@ -12,7 +12,7 @@ spec:
       appImage: string
   resources:
     # 1. MySQL Resource
-    - id: mysql-db
+    - id: mysqlDb
       template:
         apiVersion: mysql.oci.upbound.io/v1alpha1
         kind: MysqlDbSystem
@@ -58,7 +58,7 @@ spec:
                   env:
                     # FETCH FQDN FROM STATUS (The Plain Solution)
                     - name: DB_HOST
-                      value: ${mysql-db.status.atProvider.endpoints[0].hostname}
+                      value: ${mysqlDb.status.atProvider.endpoints[0].hostname}
                     - name: REDIS_HOST
                       value: ${redis-cluster.status.atProvider.primaryEndpoint}
                     
