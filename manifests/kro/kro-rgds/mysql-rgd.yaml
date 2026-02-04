@@ -1,7 +1,7 @@
 apiVersion: kro.run/v1alpha1
 kind: ResourceGraphDefinition
 metadata:
-  name: mysql-appstack
+  name: mysqlappstacks.oci.platform.com
 spec:
   schema:
     apiVersion: v1alpha1
@@ -13,11 +13,9 @@ spec:
       subnetId: string
       shapeName: string | default="MySQL.2"
       availabilityDomain: string | default="Vihs:EU-FRANKFURT-1-AD-1"
-      # Initial password secret reference provided by the user
-      adminPasswordSecret: string
+      adminPasswordSecret: string # Name of the manual init secret
 
   resources:
-    # --- 1. OCI MySQL DB System (The Managed Infrastructure) ---
     - id: mysqlDb
       template:
         apiVersion: mysql.oci.upbound.io/v1alpha1
@@ -25,7 +23,6 @@ spec:
         metadata:
           name: ${schema.spec.name}-mysql
         spec:
-          # Crossplane will write credentials (user/pass) here
           writeConnectionSecretToRef:
             name: ${schema.spec.name}-mysql-creds
             namespace: ${schema.spec.namespace}
@@ -41,7 +38,6 @@ spec:
               namespace: ${schema.spec.namespace}
               key: MYSQL_PASSWORD
 
-    # --- 2. Dynamic Connection Secret (The Discovery Layer) ---
     - id: mysqlConnSecret
       template:
         apiVersion: v1
@@ -51,6 +47,6 @@ spec:
           namespace: ${schema.spec.namespace}
         type: Opaque
         stringData:
-          # CEL expression to grab the first endpoint from the OCI status array
+          # Discovery: wait for OCI to assign the FQDN
           host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
           port: "3306"
