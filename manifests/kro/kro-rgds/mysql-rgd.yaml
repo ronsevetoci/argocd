@@ -1,0 +1,53 @@
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: mysql-appstack
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: MysqlAppStack
+    spec:
+      name: string | default="demo"
+      namespace: string | default="demo"
+      compartmentId: string
+      subnetId: string
+      shapeName: string | default="MySQL.2"
+      availabilityDomain: string | default="Vihs:EU-FRANKFURT-1-AD-1"
+
+  resources:
+    - id: mysqlDb
+      template:
+        apiVersion: mysql.oci.upbound.io/v1alpha1
+        kind: MysqlDbSystem
+        metadata:
+          name: ${schema.spec.name}-mysql
+        spec:
+          # Crossplane will write the finalized connection details (creds) here
+          writeConnectionSecretToRef:
+            name: ${schema.spec.name}-mysql-conn
+            namespace: ${schema.spec.namespace}
+          forProvider:
+            availabilityDomain: ${schema.spec.availabilityDomain}
+            compartmentId: ${schema.spec.compartmentId}
+            shapeName: ${schema.spec.shapeName}
+            displayName: ${schema.spec.name}-mysql
+            subnetId: ${schema.spec.subnetId}
+            adminUsername: "admin"
+            # Reference the secret you created manually for the initial password
+            adminPasswordSecretRef:
+              name: ${schema.spec.name}-mysql-admin-pwd
+              namespace: ${schema.spec.namespace}
+              key: MYSQL_PASSWORD
+
+    - id: mysqlConnSecret
+      template:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: ${schema.spec.name}-mysql-endpoint
+          namespace: ${schema.spec.namespace}
+        type: Opaque
+        stringData:
+          # Pulling the FQDN from the first element of the endpoints array
+          host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
+          port: "3306"
