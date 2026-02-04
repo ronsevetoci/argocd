@@ -35,7 +35,7 @@ gateway:
 connections:
   redis:
     secretName: demo-redis-conn
-    hostKey: endpoint
+    hostKey: host
     portKey: port
     # alternatively, some providers publish "host" / "uri" etc.
 
