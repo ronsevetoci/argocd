@@ -1,10 +1,4 @@
-# Karpenter Provider OCI
-#
-# Copyright (c) 2026 Oracle and/or its affiliates.
-# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
-
-{{- if .Values.serviceMonitor.enabled }}
----
+{{- if.Values.serviceMonitor.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -32,4 +26,4 @@ spec:
     {{- with .Values.serviceMonitor.endpointConfig }}
       {{- toYaml . | nindent 6 }}
     {{- end }}
-{{- end }}
+{{- end -}}
