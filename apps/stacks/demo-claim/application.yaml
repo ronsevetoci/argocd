@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-claim
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "80"
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/ronsevetoci/argocd.git
+    targetRevision: main
+    path: manifests/stacks/demo/claim
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
