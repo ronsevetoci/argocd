@@ -8,4 +8,4 @@ spec:
   namespace: demo
   compartmentId: "ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa"
   subnetId: "ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra"
-  adminPasswordSecret: "VDckbEw5QG1RMnBaeCQ="
+  adminPasswordSecret: "mysql-admin-pass"

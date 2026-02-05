@@ -40,7 +40,7 @@ connections:
     # alternatively, some providers publish "host" / "uri" etc.
 
   mysql:
-    secretName: demo-mysql-conn
+    secretName: mysql-admin-pass
     hostKey: endpoint
     portKey: port
     usernameKey: username
