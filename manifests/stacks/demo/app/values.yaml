@@ -24,7 +24,7 @@ mysql:
   database: "demo"
 
 dbSecret:
-  name: "demo-db-conn"
+  name: "mysql-admin-pass"
 
 gateway:
   parentGatewayName: "eg"
