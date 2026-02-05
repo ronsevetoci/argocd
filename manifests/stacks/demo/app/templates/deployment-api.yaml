@@ -40,7 +40,7 @@ spec:
           - name: MYSQL_PORT
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
+                name: {{ .Values.connections.mysql.hostSecret }}
                 key: port
 
           - name: MYSQL_USER
