@@ -44,15 +44,9 @@ spec:
                 key: port
 
           - name: MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
-                key: {{ .Values.connections.mysql.usernameKey }}
+            value: admin
           - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.secretName }}
-                key: {{ .Values.connections.mysql.passwordKey }}
+            value: MYSQL_PASSWORD
 
           - name: MYSQL_DB
             value: {{ .Values.connections.mysql.database | quote }}
