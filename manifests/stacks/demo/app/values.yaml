@@ -41,6 +41,7 @@ connections:
 
   mysql:
     secretName: mysql-admin-pass
+    hostSecret: demo-db-endpoint
     hostKey: endpoint
     portKey: port
     usernameKey: username
