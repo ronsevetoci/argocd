@@ -50,5 +50,5 @@ spec:
         type: Opaque
         stringData:
           # This line makes KRO wait for the DB to be active in OCI
-          host: ${mysqlDb.status.atProvider.endpoints[0].hostname}
+          host: ${mysqlDb.status.atProvider.endpoints[0].ipaddress}
           port: "3306"
