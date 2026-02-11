@@ -212,7 +212,7 @@ settings:
   # -- by default only IPv4, add IPv6 in needed
   ipFamilies: [ IPv4 ]
   # -- apiserver endpoint for worker nodes to communicate
-  apiserverEndpoint: "10.0.0.20"
+  apiserverEndpoint: "10.0.163.11"
 
   # -- The maximum length of a batch window. The longer this is, the more pods we can consider for provisioning at one
   # time which usually results in fewer but larger nodes.
