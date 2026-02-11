@@ -9,7 +9,7 @@ spec:
       nodeClassRef:
         group: oci.oraclecloud.com
         kind: OCINodeClass
-        name: karpenter1
+        name: oci-node
       requirements:
         - key: karpenter.sh/capacity-type
           operator: In
