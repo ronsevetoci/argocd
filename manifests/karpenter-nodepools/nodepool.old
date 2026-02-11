@@ -1,7 +1,7 @@
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
-  name: amd-node-pool
+  name: karpenter-1
 spec:
   template:
     spec:
@@ -13,22 +13,18 @@ spec:
       requirements:
         - key: karpenter.sh/capacity-type
           operator: In
-          values:
-            - on-demand
-        - key: kubernetes.io/arch
-          operator: In
-          values:
-            - amd64
+          values: [on-demand]
         - key: oci.oraclecloud.com/instance-shape
           operator: In
           values:
             - VM.Standard.E4.Flex
-      terminationGracePeriod: 20m
+            - VM.Standard.E5.Flex
+      terminationGracePeriod: 120m
   disruption:
     budgets:
       - nodes: 5%
-    consolidateAfter: "0s"
-    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 60m
+    consolidationPolicy: WhenEmpty
   limits:
-    cpu: 10
-    memory: 25Gi
+    cpu: 20
+    memory: 160Gi
