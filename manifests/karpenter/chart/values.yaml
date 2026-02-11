@@ -208,7 +208,7 @@ settings:
   # -- Cluster's VCN compartment OCID
   vcnCompartmentId: "ocid1.compartment.oc1..aaaaaaaayevnkjfyjb6nglndfrvgoy7hciclgf4kq7ioulokey7xfpixjhxa"
   # -- set this to true for a cluster run with OciVcnIpNative
-  ociVcnIpNative: false
+  ociVcnIpNative: true
   # -- by default only IPv4, add IPv6 in needed
   ipFamilies: [ IPv4 ]
   # -- apiserver endpoint for worker nodes to communicate
