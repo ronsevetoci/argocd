@@ -1,0 +1,27 @@
+apiVersion: oci.oraclecloud.com/v1alpha1
+kind: OCINodeClass
+metadata:
+  name: karpenter1
+spec:
+  shapeConfigs:
+    - ocpus: 2
+      memoryInGbs: 8
+    - ocpus: 4
+      memoryInGbs: 16
+  volumeConfig:
+    bootVolumeConfig:
+      imageConfig:
+        imageType: OKEImage
+        imageId: ocid1.image.oc1.eu-frankfurt-1.aaaaaaaark6eswpvweu4epvsu4hftwbtzcpxaeat6i4ap2r7jv6zborelpaq
+  networkConfig:
+    primaryVnicConfig:
+      networkSecurityGroupConfigs:
+        - networkSecurityGroupId: ocid1.networksecuritygroup.oc1.eu-frankfurt-1.aaaaaaaaynuhfktcsud4cbaykho57u6svxwwicd5ilrixc67n5q3hu4k655q
+      subnetConfig:
+        subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaadg2a5ghugyjctvblad23r735r7fn33wofakwpiqvwftemsgtobra
+    secondaryVnicConfigs:
+      - networkSecurityGroupConfigs:
+          - networkSecurityGroupId: ocid1.networksecuritygroup.oc1.eu-frankfurt-1.aaaaaaaaaop7xrbqqzr36fr77flojwiu7locutszbueioyqits5zay4k2fxa
+        subnetConfig:
+          subnetId: ocid1.subnet.oc1.eu-frankfurt-1.aaaaaaaacn6qhvhx5q32zeguf6uyehx3kt66o6in4f5fmkejt5n57idtac5a
+        ipCount: 16
