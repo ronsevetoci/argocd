@@ -10,7 +10,7 @@ spec:
     - name: public-gateway
       namespace: demo
   hostnames:
-    - {{ .Values.gateway.host | quote }}
+    - demo.example.com
   rules:
     - matches:
         - path:
