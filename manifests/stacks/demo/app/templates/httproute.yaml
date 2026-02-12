@@ -7,7 +7,7 @@ metadata:
     {{- include "demo-api.labels" . | nindent 4 }}
 spec:
   parentRefs:
-    - name: {{ .Values.gateway.name }}
+    - name: public-gateway
       namespace: {{ .Values.gateway.namespace }}
   hostnames:
     - {{ .Values.gateway.host | quote }}
