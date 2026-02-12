@@ -8,7 +8,7 @@ metadata:
 spec:
   parentRefs:
     - name: public-gateway
-      namespace: {{ .Values.gateway.namespace }}
+      namespace: demo
   hostnames:
     - {{ .Values.gateway.host | quote }}
   rules:
