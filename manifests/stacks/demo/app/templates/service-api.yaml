@@ -1,11 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo-api
+  name: {{ include "demo-api.fullname" . }}
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
 spec:
   selector:
-    app: demo-api
+    {{- include "demo-api.selectorLabels" . | nindent 4 }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: 8080

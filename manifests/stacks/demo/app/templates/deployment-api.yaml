@@ -1,52 +1,119 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-api
+  name: {{ include "demo-api.fullname" . }}
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: demo-api
+      {{- include "demo-api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: demo-api
+        {{- include "demo-api.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-        - name: api
+        - name: demo-api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 8080
               name: http
           env:
-          - name: REDIS_HOST
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.redis.secretName }}
-                key: {{ .Values.connections.redis.hostKey }}
-          - name: REDIS_PORT
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.redis.secretName }}
-                key: {{ .Values.connections.redis.portKey }}
+            - name: LISTEN_ADDR
+              value: ":8080"
+            - name: SESSION_TTL
+              value: {{ .Values.app.sessionTTL | quote }}
+            - name: MAX_BODY_BYTES
+              value: {{ .Values.app.maxBodyBytes | quote }}
+            - name: VERBOSE_BY_DEFAULT
+              value: {{ .Values.app.verboseByDefault | quote }}
+            - name: REQUIRE_JSON
+              value: {{ .Values.app.requireJSON | quote }}
+            - name: MYSQL_TABLE
+              value: {{ .Values.app.mysqlTable | quote }}
 
-          - name: MYSQL_HOST
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.hostSecret }}
-                key: host
-          - name: MYSQL_PORT
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.connections.mysql.hostSecret }}
-                key: port
+            # ---- Redis host/port/password from secret ----
+            - name: REDIS_ADDR
+              value: "$(REDIS_HOST):$(REDIS_PORT)"
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.redis.secretName }}
+                  key: {{ .Values.connections.redis.hostKey }}
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.redis.secretName }}
+                  key: {{ .Values.connections.redis.portKey }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.redis.secretName }}
+                  key: {{ .Values.connections.redis.passwordKey }}
+                  optional: true
 
-          - name: MYSQL_USER
-            value: admin
-          - name: MYSQL_PASSWORD
-            value: MYSQL_PASSWORD
+            # ---- MySQL DSN from secret (preferred) ----
+            - name: MYSQL_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.mysql.secretName }}
+                  key: {{ .Values.connections.mysql.dsnKey }}
+                  optional: true
 
-          - name: MYSQL_DB
-            value: {{ .Values.connections.mysql.database | quote }}
+            # If your MySQL secret does NOT have DSN, build it from pieces:
+            - name: MYSQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.mysql.secretName }}
+                  key: {{ .Values.connections.mysql.hostKey }}
+                  optional: true
+            - name: MYSQL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.mysql.secretName }}
+                  key: {{ .Values.connections.mysql.portKey }}
+                  optional: true
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.mysql.secretName }}
+                  key: {{ .Values.connections.mysql.userKey }}
+                  optional: true
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.mysql.secretName }}
+                  key: {{ .Values.connections.mysql.passwordKey }}
+                  optional: true
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.connections.mysql.secretName }}
+                  key: {{ .Values.connections.mysql.databaseKey }}
+                  optional: true
+          command: ["/demo-api"]
+          args: []
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 10

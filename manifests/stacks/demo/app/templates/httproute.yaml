@@ -3,11 +3,19 @@ kind: HTTPRoute
 metadata:
   name: demo-api
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
 spec:
   parentRefs:
-    - name: {{ .Values.gateway.parentGatewayName }}
-      namespace: {{ .Values.gateway.parentGatewayNamespace }}
+    - name: {{ .Values.gateway.name }}
+      namespace: {{ .Values.gateway.namespace }}
+  hostnames:
+    - {{ .Values.gateway.host | quote }}
   rules:
-    - backendRefs:
-        - name: demo-api
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "demo-api.fullname" . }}
           port: {{ .Values.service.port }}

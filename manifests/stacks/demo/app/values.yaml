@@ -2,49 +2,41 @@ namespace: demo
 
 image:
   repository: fra.ocir.io/frsxwtjslf35/demo-api
-  tag: "v0.1.0"
+  tag: "0.2.0"
   pullPolicy: IfNotPresent
 
 replicaCount: 2
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
-
 service:
-  port: 8080
+  port: 80
+  targetPort: 8080
 
-redis:
-  host: "redis.demo.svc.cluster.local"
-  port: 6379
-
-mysql:
-  host: "mysql.demo.svc.cluster.local"
-  port: 3306
-  database: "demo"
-
-dbSecret:
-  name: "mysql-admin-pass"
-
-gateway:
-  parentGatewayName: "eg"
-  parentGatewayNamespace: "envoy-gateway-system"
-  hostname: ""
-  pathPrefix: "/"
-
+# If you already have Secrets produced by Crossplane / KRO
 connections:
   redis:
     secretName: demo-redis-conn
+    # keys expected in the secret:
     hostKey: host
     portKey: port
-    # alternatively, some providers publish "host" / "uri" etc.
-
-  mysql:
-    secretName: mysql-admin-pass
-    hostSecret: demo-db-endpoint
-    hostKey: endpoint
-    portKey: port
-    usernameKey: username
     passwordKey: password
-    database: demo
+  mysql:
+    secretName: demo-mysql-conn
+    # either provide MYSQL_DSN directly, or pieces:
+    dsnKey: dsn
+    hostKey: host
+    portKey: port
+    userKey: username
+    passwordKey: password
+    databaseKey: database
 
+app:
+  sessionTTL: "24h"
+  maxBodyBytes: 1048576
+  verboseByDefault: true
+  requireJSON: false
+  mysqlTable: requests
+
+# schedule on “core” nodes or not (adjust to your model)
+nodeSelector: {}
+tolerations: []
+affinity: {}
