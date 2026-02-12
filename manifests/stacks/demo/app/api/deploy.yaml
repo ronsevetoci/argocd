@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: <region-key>.ocir.io/<namespace>/<repo>:v1
+        image: fra.ocir.io/frsxwtjslf35/demo-api:0.2.0
         ports:
         - containerPort: 8080
         env:
