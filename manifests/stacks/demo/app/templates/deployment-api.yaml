@@ -80,15 +80,10 @@ spec:
             - name: MYSQL_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.connections.mysql.secretName }}
-                  key: {{ .Values.connections.mysql.hostKey }}
-                  optional: true
+                  name: demo-db-endpoint
+                  key: host
             - name: MYSQL_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.connections.mysql.secretName }}
-                  key: {{ .Values.connections.mysql.portKey }}
-                  optional: true
+              value: 3306
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
