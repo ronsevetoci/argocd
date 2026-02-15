@@ -3,15 +3,13 @@ kind: ProviderConfig
 metadata:
   name: sql-config
 spec:
-  # 1. Fetching the Password
   credentials:
     source: Secret
     secretRef:
-      name: mysql-conn-details
-      namespace: default
-      key: password
-  # 2. Fetching the Address (Endpoint)
-  # Most SQL providers allow you to reference the endpoint via an environment variable 
-  # or a string. If the provider doesn't support direct secret mapping for the endpoint field, 
-  # you use the fixed private IP or the FQDN provided in the OCI Console.
-  endpoint: "mysql-instance-ip-or-fqdn:3306"
+      name: demo-mysql-conn
+      namespace: demo
+      key: MYSQL_PASSWORD
+  endpointRef:
+    name: demo-db-endpoint
+    key: host # The key kro used for the IP/Host
+  user: admin
