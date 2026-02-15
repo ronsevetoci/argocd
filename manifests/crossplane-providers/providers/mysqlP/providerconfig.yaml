@@ -1,0 +1,17 @@
+apiVersion: mysql.sql.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: mysql-sql-config
+spec:
+  # 1. Fetching the Password
+  credentials:
+    source: Secret
+    secretRef:
+      name: mysql-conn-details
+      namespace: default
+      key: password
+  # 2. Fetching the Address (Endpoint)
+  # Most SQL providers allow you to reference the endpoint via an environment variable 
+  # or a string. If the provider doesn't support direct secret mapping for the endpoint field, 
+  # you use the fixed private IP or the FQDN provided in the OCI Console.
+  endpoint: "mysql-instance-ip-or-fqdn:3306"
