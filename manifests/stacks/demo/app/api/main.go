@@ -12,6 +12,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -110,17 +111,18 @@ func envDuration(key string, fallback time.Duration) time.Duration {
 }
 
 func loadConfig() Config {
-	// 1. Collect individual DB env vars
-	user := mustEnv("DB_USER", "user")
-	pass := mustEnv("DB_PASSWORD", "pass")
+	user := mustEnv("DB_USER", "admin")
+	pass := mustEnv("DB_PASSWORD", "T7$lL9@mQ2pZx$") // The raw password
 	host := mustEnv("DB_HOST", "mysql")
 	port := mustEnv("DB_PORT", "3306")
 	dbName := mustEnv("DB_NAME", "demo")
 
-	// 2. Construct the DSN
-	// Format: username:password@tcp(host:port)/dbname?params
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
-		user, pass, host, port, dbName)
+	// Escape the password to handle the '@' and '$' characters safely
+	safePass := url.QueryEscape(pass)
+
+	// Construct the DSN with the escaped password
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4",
+		user, safePass, host, port, dbName)
 
 	return Config{
 		ListenAddr:     mustEnv("LISTEN_ADDR", ":8080"),
