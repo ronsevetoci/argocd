@@ -26,12 +26,19 @@ import (
 )
 
 type Config struct {
-	ListenAddr         string
-	RedisAddr          string
-	RedisPassword      string
-	RedisDB            int
-	RedisKeyPrefix     string
-	SessionTTL         time.Duration
+	ListenAddr     string
+	RedisAddr      string
+	RedisPassword  string
+	RedisDB        int
+	RedisKeyPrefix string
+	SessionTTL     time.Duration
+	// Database components
+	MySQLUser   string
+	MySQLPass   string
+	MySQLHost   string
+	MySQLPort   string
+	MySQLDbName string
+	// The final DSN used by the driver
 	MySQLDSN           string
 	MySQLTable         string
 	MaxBodyBytes       int64
@@ -39,7 +46,6 @@ type Config struct {
 	RequireJSON        bool
 	TrustXForwardedFor bool
 }
-
 type App struct {
 	cfg   Config
 	rdb   *redis.Client
@@ -104,16 +110,36 @@ func envDuration(key string, fallback time.Duration) time.Duration {
 }
 
 func loadConfig() Config {
+	// 1. Collect individual DB env vars
+	user := mustEnv("DB_USER", "user")
+	pass := mustEnv("DB_PASSWORD", "pass")
+	host := mustEnv("DB_HOST", "mysql")
+	port := mustEnv("DB_PORT", "3306")
+	dbName := mustEnv("DB_NAME", "demo")
+
+	// 2. Construct the DSN
+	// Format: username:password@tcp(host:port)/dbname?params
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
+		user, pass, host, port, dbName)
+
 	return Config{
-		ListenAddr:         mustEnv("LISTEN_ADDR", ":8080"),
-		RedisAddr:          mustEnv("REDIS_ADDR", "redis:6379"),
-		RedisPassword:      mustEnv("REDIS_PASSWORD", ""),
-		RedisDB:            envInt("REDIS_DB", 0),
-		RedisKeyPrefix:     mustEnv("REDIS_KEY_PREFIX", "demo:sess:"),
-		SessionTTL:         envDuration("SESSION_TTL", 24*time.Hour),
-		MySQLDSN:           mustEnv("MYSQL_DSN", "user:pass@tcp(mysql:3306)/demo?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci"),
+		ListenAddr:     mustEnv("LISTEN_ADDR", ":8080"),
+		RedisAddr:      mustEnv("REDIS_ADDR", "redis:6379"),
+		RedisPassword:  mustEnv("REDIS_PASSWORD", ""),
+		RedisDB:        envInt("REDIS_DB", 0),
+		RedisKeyPrefix: mustEnv("REDIS_KEY_PREFIX", "demo:sess:"),
+		SessionTTL:     envDuration("SESSION_TTL", 24*time.Hour),
+
+		// Map the DB pieces back to the struct
+		MySQLUser:   user,
+		MySQLPass:   pass,
+		MySQLHost:   host,
+		MySQLPort:   port,
+		MySQLDbName: dbName,
+		MySQLDSN:    dsn,
+
 		MySQLTable:         mustEnv("MYSQL_TABLE", "requests"),
-		MaxBodyBytes:       envInt64("MAX_BODY_BYTES", 1<<20), // 1MiB
+		MaxBodyBytes:       envInt64("MAX_BODY_BYTES", 1<<20),
 		VerboseByDefault:   envBool("VERBOSE_BY_DEFAULT", true),
 		RequireJSON:        envBool("REQUIRE_JSON", false),
 		TrustXForwardedFor: envBool("TRUST_X_FORWARDED_FOR", true),
