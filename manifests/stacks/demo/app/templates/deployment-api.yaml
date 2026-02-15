@@ -68,11 +68,6 @@ spec:
                   key: {{ .Values.connections.redis.passwordKey }}
                   optional: true
 
-            # ---- MySQL DSN from secret (preferred) ----
-            - name: MYSQL_DSN
-              value:             - name: MYSQL_DSN
-              value: "{{ .Values.mysql.user }}:{{ .Values.mysql.password }}@tcp({{ .Values.mysql.host }}:{{ .Values.mysql.port }})/{{ .Values.mysql.database }}?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci"
-                
 
             # If your MySQL secret does NOT have DSN, build it from pieces:
             - name: MYSQL_HOST
