@@ -83,7 +83,7 @@ spec:
                   name: demo-db-endpoint
                   key: host
             - name: MYSQL_PORT
-              value: 3306
+              value: "3306"
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
