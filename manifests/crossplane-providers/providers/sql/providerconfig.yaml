@@ -1,7 +1,7 @@
 apiVersion: mysql.sql.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
-  name: mysql-sql-config
+  name: sql-config
 spec:
   # 1. Fetching the Password
   credentials:
