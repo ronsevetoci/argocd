@@ -12,7 +12,7 @@ spec:
       namespace: crossplane-system
       key: password
   providerConfigRef:
-    name: mysql-sql-config
+    name: sql-config
 
 ---
 
@@ -28,4 +28,4 @@ spec:
     privileges:
       - ALL PRIVILEGES
   providerConfigRef:
-    name: mysql-sql-config
+    name: sql-config
