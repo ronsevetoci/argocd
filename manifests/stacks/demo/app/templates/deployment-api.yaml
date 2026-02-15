@@ -70,7 +70,7 @@ spec:
 
 
             # If your MySQL secret does NOT have DSN, build it from pieces:
-            - name: MYSQL_HOST
+            - name: DB_HOST
               valueFrom:
                 secretKeyRef:
                   name: demo-db-endpoint
