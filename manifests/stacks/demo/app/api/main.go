@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -12,7 +11,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -22,8 +20,6 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type Config struct {
@@ -33,26 +29,21 @@ type Config struct {
 	RedisDB        int
 	RedisKeyPrefix string
 	SessionTTL     time.Duration
-	// Database components
-	MySQLUser   string
-	MySQLPass   string
-	MySQLHost   string
-	MySQLPort   string
-	MySQLDbName string
-	// The final DSN used by the driver
-	MySQLDSN           string
-	MySQLTable         string
+	RequestTTL     time.Duration // New: How long to keep request payloads
+
 	MaxBodyBytes       int64
 	VerboseByDefault   bool
 	RequireJSON        bool
 	TrustXForwardedFor bool
 }
+
 type App struct {
 	cfg   Config
 	rdb   *redis.Client
-	db    *sql.DB
 	start time.Time
 }
+
+// --- Helper Functions ---
 
 func mustEnv(key string, fallback string) string {
 	v := strings.TrimSpace(os.Getenv(key))
@@ -111,19 +102,6 @@ func envDuration(key string, fallback time.Duration) time.Duration {
 }
 
 func loadConfig() Config {
-	user := mustEnv("DB_USER", "admin")
-	pass := mustEnv("DB_PASSWORD", "T7$lL9@mQ2pZx$") // The raw password
-	host := mustEnv("DB_HOST", "mysql")
-	port := mustEnv("DB_PORT", "3306")
-	dbName := mustEnv("DB_NAME", "demo")
-
-	// Escape the password to handle the '@' and '$' characters safely
-	safePass := url.QueryEscape(pass)
-
-	// Construct the DSN with the escaped password
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4",
-		user, safePass, host, port, dbName)
-
 	return Config{
 		ListenAddr:     mustEnv("LISTEN_ADDR", ":8080"),
 		RedisAddr:      mustEnv("REDIS_ADDR", "redis:6379"),
@@ -131,17 +109,9 @@ func loadConfig() Config {
 		RedisDB:        envInt("REDIS_DB", 0),
 		RedisKeyPrefix: mustEnv("REDIS_KEY_PREFIX", "demo:sess:"),
 		SessionTTL:     envDuration("SESSION_TTL", 24*time.Hour),
+		RequestTTL:     envDuration("REQUEST_TTL", 24*time.Hour), // Defaults to 24h
 
-		// Map the DB pieces back to the struct
-		MySQLUser:   user,
-		MySQLPass:   pass,
-		MySQLHost:   host,
-		MySQLPort:   port,
-		MySQLDbName: dbName,
-		MySQLDSN:    dsn,
-
-		MySQLTable:         mustEnv("MYSQL_TABLE", "requests"),
-		MaxBodyBytes:       envInt64("MAX_BODY_BYTES", 1<<20),
+		MaxBodyBytes:       envInt64("MAX_BODY_BYTES", 1<<20), // 1MB
 		VerboseByDefault:   envBool("VERBOSE_BY_DEFAULT", true),
 		RequireJSON:        envBool("REQUIRE_JSON", false),
 		TrustXForwardedFor: envBool("TRUST_X_FORWARDED_FOR", true),
@@ -154,36 +124,6 @@ func newRedis(cfg Config) *redis.Client {
 		Password: cfg.RedisPassword,
 		DB:       cfg.RedisDB,
 	})
-}
-
-func newMySQL(cfg Config) (*sql.DB, error) {
-	db, err := sql.Open("mysql", cfg.MySQLDSN)
-	if err != nil {
-		return nil, err
-	}
-	db.SetConnMaxLifetime(10 * time.Minute)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(5)
-	return db, nil
-}
-
-func (a *App) ensureTable(ctx context.Context) error {
-	// Minimal table schema: stores raw JSON payload + metadata
-	stmt := fmt.Sprintf(`
-CREATE TABLE IF NOT EXISTS %s (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  session_id VARCHAR(64) NOT NULL,
-  request_id VARCHAR(64) NOT NULL,
-  payload_json JSON NULL,
-  payload_raw MEDIUMTEXT NULL,
-  payload_sha256 CHAR(64) NOT NULL,
-  ip VARCHAR(64) NOT NULL,
-  user_agent VARCHAR(512) NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`, a.cfg.MySQLTable)
-
-	_, err := a.db.ExecContext(ctx, stmt)
-	return err
 }
 
 func clientIP(r *http.Request, trustXFF bool) string {
@@ -207,6 +147,16 @@ func sha256Hex(b []byte) string {
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])
 }
+
+func writeJSON(w http.ResponseWriter, code int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(v)
+}
+
+// --- Session Logic ---
 
 type Session struct {
 	ID        string    `json:"id"`
@@ -233,7 +183,6 @@ func (a *App) getOrCreateSession(ctx context.Context, w http.ResponseWriter, r *
 			Path:     "/",
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
-			// Secure: true, // enable when behind TLS
 		})
 	} else {
 		sid = cookie.Value
@@ -242,7 +191,6 @@ func (a *App) getOrCreateSession(ctx context.Context, w http.ResponseWriter, r *
 	key := a.sessionKey(sid)
 	now := time.Now().UTC()
 
-	// HSET createdAt only if not exists; update lastSeen; incr count
 	pipe := a.rdb.TxPipeline()
 	// If session new or missing, set createdAt
 	pipe.HSetNX(ctx, key, "createdAt", now.Format(time.RFC3339Nano))
@@ -255,7 +203,6 @@ func (a *App) getOrCreateSession(ctx context.Context, w http.ResponseWriter, r *
 		return Session{}, created, perr
 	}
 
-	// Read back fields
 	m, gerr := a.rdb.HGetAll(ctx, key).Result()
 	if gerr != nil {
 		return Session{}, created, gerr
@@ -279,6 +226,8 @@ func (a *App) getOrCreateSession(ctx context.Context, w http.ResponseWriter, r *
 	return s, created, nil
 }
 
+// --- Handlers ---
+
 func (a *App) handleHealth(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
@@ -286,22 +235,17 @@ func (a *App) handleHealth(w http.ResponseWriter, r *http.Request) {
 	redisOK := true
 	if err := a.rdb.Ping(ctx).Err(); err != nil {
 		redisOK = false
-	}
-
-	mysqlOK := true
-	if err := a.db.PingContext(ctx); err != nil {
-		mysqlOK = false
+		log.Printf("Health check failed: Redis unreachable: %v", err)
 	}
 
 	code := http.StatusOK
-	if !redisOK || !mysqlOK {
+	if !redisOK {
 		code = http.StatusServiceUnavailable
 	}
 
 	resp := map[string]any{
 		"ok":        code == http.StatusOK,
 		"redisOk":   redisOK,
-		"mysqlOk":   mysqlOK,
 		"uptimeSec": int(time.Since(a.start).Seconds()),
 	}
 	writeJSON(w, code, resp)
@@ -331,67 +275,66 @@ func (a *App) handleEcho(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = r.Body.Close()
 
-	// Validate JSON optionally (but still store raw)
-	var payload any
-	isJSON := true
-	if len(strings.TrimSpace(string(body))) == 0 {
-		isJSON = false
-	} else if jerr := json.Unmarshal(body, &payload); jerr != nil {
-		isJSON = false
-		payload = nil
-	}
-
-	// Session in Redis
+	// Get Session (Pure Redis)
 	sess, sessCreated, serr := a.getOrCreateSession(ctx, w, r)
 	if serr != nil {
 		writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "redis session failure", "details": serr.Error()})
 		return
 	}
 
+	// Prepare Request Data
 	reqID := uuid.New().String()
 	ip := clientIP(r, a.cfg.TrustXForwardedFor)
 	ua := r.UserAgent()
 	hash := sha256Hex(body)
 
-	// Insert into MySQL
-	insertT0 := time.Now()
-	insertStmt := fmt.Sprintf(
-		`INSERT INTO %s (session_id, request_id, payload_json, payload_raw, payload_sha256, ip, user_agent)
-         VALUES (?, ?, CAST(? AS JSON), ?, ?, ?, ?)`, a.cfg.MySQLTable,
-	)
-
-	// If payload isn't JSON, CAST(? AS JSON) will fail. So choose statement based on isJSON.
-	var res sql.Result
-	if isJSON {
-		res, err = a.db.ExecContext(ctx, insertStmt,
-			sess.ID, reqID, string(body), string(body), hash, ip, ua,
-		)
-	} else {
-		// Store payload_json as NULL
-		insertStmt2 := fmt.Sprintf(
-			`INSERT INTO %s (session_id, request_id, payload_json, payload_raw, payload_sha256, ip, user_agent)
-             VALUES (?, ?, NULL, ?, ?, ?, ?)`, a.cfg.MySQLTable,
-		)
-		res, err = a.db.ExecContext(ctx, insertStmt2,
-			sess.ID, reqID, string(body), hash, ip, ua,
-		)
+	// Determine if valid JSON (for metadata)
+	var payload any
+	isJSON := true
+	if len(strings.TrimSpace(string(body))) == 0 {
+		isJSON = false
+	} else if jerr := json.Unmarshal(body, &payload); jerr != nil {
+		isJSON = false
 	}
+
+	// --- REDIS STORAGE (Replaces MySQL) ---
+	storageT0 := time.Now()
+	reqKey := fmt.Sprintf("req:%s", reqID) // New key for the request payload
+
+	// Store fields in a Redis Hash
+	payloadData := map[string]interface{}{
+		"session_id":  sess.ID,
+		"request_id":  reqID,
+		"ip":          ip,
+		"user_agent":  ua,
+		"sha256":      hash,
+		"is_json":     isJSON,
+		"payload_raw": string(body), // Store the raw body
+		"created_at":  time.Now().Format(time.RFC3339Nano),
+	}
+
+	// Use Pipeline for atomicity (Set Hash + Set Expiry)
+	pipe := a.rdb.Pipeline()
+	pipe.HSet(ctx, reqKey, payloadData)
+	pipe.Expire(ctx, reqKey, a.cfg.RequestTTL)
+	_, err = pipe.Exec(ctx)
+
 	if err != nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "mysql insert failed", "details": err.Error()})
+		writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "redis storage failed", "details": err.Error()})
 		return
 	}
-	insertID, _ := res.LastInsertId()
+	// --------------------------------------
 
 	resp := map[string]any{
 		"requestId": reqID,
-		"insertId":  insertID,
 		"ok":        true,
+		"storage":   "redis",
 	}
 
 	if verbose {
 		resp["timingsMs"] = map[string]any{
-			"total": time.Since(t0).Milliseconds(),
-			"mysql": time.Since(insertT0).Milliseconds(),
+			"total":   time.Since(t0).Milliseconds(),
+			"storage": time.Since(storageT0).Milliseconds(),
 		}
 		resp["session"] = map[string]any{
 			"id":        sess.ID,
@@ -399,15 +342,10 @@ func (a *App) handleEcho(w http.ResponseWriter, r *http.Request) {
 			"createdAt": sess.CreatedAt,
 			"lastSeen":  sess.LastSeen,
 			"count":     sess.Count,
-			"ttl":       a.cfg.SessionTTL.String(),
 		}
 		resp["redis"] = map[string]any{
-			"addr": a.cfg.RedisAddr,
-			"db":   a.cfg.RedisDB,
-			"key":  a.sessionKey(sess.ID),
-		}
-		resp["mysql"] = map[string]any{
-			"table": a.cfg.MySQLTable,
+			"key": reqKey,
+			"ttl": a.cfg.RequestTTL.String(),
 		}
 		resp["payload"] = map[string]any{
 			"bytes":  len(body),
@@ -423,30 +361,15 @@ func (a *App) handleEcho(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
-func writeJSON(w http.ResponseWriter, code int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	_ = enc.Encode(v)
-}
-
 func main() {
 	cfg := loadConfig()
 
+	// Initialize Redis
 	rdb := newRedis(cfg)
-	db, err := newMySQL(cfg)
-	if err != nil {
-		log.Fatalf("mysql open: %v", err)
-	}
 
-	app := &App{cfg: cfg, rdb: rdb, db: db, start: time.Now()}
+	// No MySQL Initialization here anymore
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := app.ensureTable(ctx); err != nil {
-		log.Fatalf("ensure table: %v", err)
-	}
+	app := &App{cfg: cfg, rdb: rdb, start: time.Now()}
 
 	r := chi.NewRouter()
 	r.Use(chimw.RequestID)
@@ -462,7 +385,8 @@ func main() {
 		Handler:           r,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	log.Printf("listening on %s", cfg.ListenAddr)
+
+	log.Printf("Starting server on %s (Redis: %s)", cfg.ListenAddr, cfg.RedisAddr)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("server: %v", err)
 	}

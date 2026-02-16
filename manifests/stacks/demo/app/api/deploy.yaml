@@ -18,18 +18,6 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: app-db-secrets
-              key: DB_USER
-        - name: DB_PASS
-          valueFrom:
-            secretKeyRef:
-              name: app-db-secrets
-              key: DB_PASS
-        - name: DB_ADDR
-          value: "mysql.db.svc.cluster.local:3306"
         - name: REDIS_ADDR
           value: "redis.cache.svc.cluster.local:6379"
         - name: DB_NAME
