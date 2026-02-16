@@ -45,8 +45,6 @@ spec:
               value: {{ .Values.app.verboseByDefault | quote }}
             - name: REQUIRE_JSON
               value: {{ .Values.app.requireJSON | quote }}
-            - name: MYSQL_TABLE
-              value: {{ .Values.app.mysqlTable | quote }}
 
             # ---- Redis host/port/password from secret ----
             - name: REDIS_ADDR
@@ -66,30 +64,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.connections.redis.secretName }}
                   key: {{ .Values.connections.redis.passwordKey }}
-                  optional: true
-
-
-            # If your MySQL secret does NOT have DSN, build it from pieces:
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: demo-db-endpoint
-                  key: host
-            - name: MYSQL_PORT
-              value: "3306"
-            - name: MYSQL_USER
-              value: admin
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.connections.mysql.secretName }}
-                  key: {{ .Values.connections.mysql.passwordKey }}
-                  optional: true
-            - name: MYSQL_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.connections.mysql.secretName }}
-                  key: {{ .Values.connections.mysql.databaseKey }}
                   optional: true
           command: ["/demo-api"]
           args: []
