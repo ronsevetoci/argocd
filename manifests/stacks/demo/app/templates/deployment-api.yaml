@@ -46,22 +46,13 @@ spec:
             - name: REQUIRE_JSON
               value: {{ .Values.app.requireJSON | quote }}
 
-            # ---- Redis host/port/password from secret ----
-            - name: REDIS_ADDR
-              value: "$(REDIS_HOST):$(REDIS_PORT)"
             - name: REDIS_HOST
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.connections.redis.secretName }}
                   key: {{ .Values.connections.redis.hostKey }}
-            - name: REDIS_PORT
-              value: "6379"
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.connections.redis.secretName }}
-                  key: {{ .Values.connections.redis.passwordKey }}
-                  optional: true
+            - name: REDIS_ADDR
+              value: "$(REDIS_HOST):6379"
           command: ["/demo-api"]
           args: []
           readinessProbe:

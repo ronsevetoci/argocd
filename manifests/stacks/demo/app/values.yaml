@@ -17,8 +17,6 @@ connections:
     secretName: demo-redis-conn
     # keys expected in the secret:
     hostKey: host
-    portKey: port
-    passwordKey: password
 
 app:
   sessionTTL: "24h"
