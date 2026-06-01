@@ -1,0 +1,68 @@
+global:
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+controller:
+  replicas: 1
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+server:
+  replicas: 1
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+repoServer:
+  replicas: 1
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+applicationSet:
+  replicas: 1
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+redis:
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+dex:
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule
+
+notifications:
+  nodeSelector:
+    oke.oraclecloud.com/pool.name: karpenter
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+      effect: NoSchedule

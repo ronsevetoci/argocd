@@ -13,15 +13,9 @@ spec:
       pvEncryptionInTransit: true
       imageConfig:
         imageType: OKEImage
-        imageId: "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaark6eswpvweu4epvsu4hftwbtzcpxaeat6i4ap2r7jv6zborelpaq"
-#        imageFilter:
-#          osFilter: OracleLinux
-#          osVersionFilter: "8"  #refer to ImageConfig section above to find an compatible OKEImage
-#          freeformTags:
-#            base_image_name: Oracle-Linux-8.10-2025.09.16-0
-#            base_image_ocid: ocid1.image.oc1.phx.aaaaaaaaodf4rssimwiwwrc7znhe3vuyt6yxb7ducuxgyft4uqa4brodw4pa
-#            k8s_version: v1.33.1
-#            release_number: a2e20de8d41
+        imageFilter:
+          osFilter: "Oracle Linux"
+          osVersionFilter: "8"  # see OCINodeClass docs for imageFilter behavior
   networkConfig:
     primaryVnicConfig:
       subnetConfig:
